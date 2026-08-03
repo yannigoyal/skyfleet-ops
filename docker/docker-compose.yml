@@ -1,0 +1,16 @@
+# Convenience wrapper for local runs. Production deployment is a single
+# `docker run` (see README.md) — this file is optional sugar on top of that.
+services:
+  app:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    ports:
+      - "8000:8000"
+    env_file:
+      - ../.env
+    volumes:
+      - skyfleet-data:/app/database
+
+volumes:
+  skyfleet-data:

@@ -1,0 +1,27 @@
+services:
+  app:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    environment:
+      LLM_MOCK: "true"
+      OPENROUTER_API_KEY: "test-key-not-used-in-mock-mode"
+    ports:
+      - "8000:8000"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/api/health"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  playwright:
+    image: mcr.microsoft.com/playwright:v1.48.0-jammy
+    working_dir: /e2e
+    volumes:
+      - .:/e2e
+    environment:
+      BASE_URL: "http://app:8000"
+    depends_on:
+      app:
+        condition: service_healthy
+    command: sh -c "npm install && npx playwright test"
