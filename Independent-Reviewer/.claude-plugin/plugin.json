@@ -1,0 +1,5 @@
+{
+  "name": "Independent-Reviewer",
+  "description": "Automatically review project changes using Codex CLI.",
+  "version": "1.0.0"
+}

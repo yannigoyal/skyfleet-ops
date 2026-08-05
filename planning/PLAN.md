@@ -169,7 +169,7 @@ Both the simulator and the MAVLink gateway client implement the same abstract in
 - A single background task (simulator or gateway poller) writes to an in-memory telemetry cache
 - The cache holds the latest reading, previous reading, and timestamp for each drone
 - SSE streams read from this cache and push updates to connected clients
-- This architecture supports future multi-fleet scenarios without changes to the data layer
+- This architecture supports future multi-ofleet scenarios without changes to the data layer
 
 ### SSE Streaming
 
@@ -294,7 +294,7 @@ When the operator sends a chat message, the backend:
 1. Loads the current fleet context (energy budget, active missions, roster with live telemetry, total fleet battery health)
 2. Loads recent conversation history from the `chat_messages` table
 3. Constructs a prompt with a system message, fleet context, conversation history, and the operator's new message
-4. Calls the LLM via LiteLLM → OpenRouter, requesting structured output, using the cerebras-inference skill
+4. Calls the LLM via LiteLLM → OpenRouter, requesting structured output, using the `cerebras` skill
 5. Parses the complete structured JSON response
 6. Auto-executes any mission launches/recalls or roster changes specified in the response
 7. Stores the message and executed actions in `chat_messages`
@@ -395,10 +395,10 @@ FastAPI serves the static frontend files and all API routes on port 8000.
 
 ### Docker Volume
 
-The SQLite database persists via a named Docker volume:
+The SQLite database persists via a bind mount of the project's `database/` directory:
 
 ```bash
-docker run -v skyfleet-data:/app/database -p 8000:8000 --env-file .env skyfleet-ops
+docker run -v "$(pwd)/database:/app/database" -p 8000:8000 --env-file .env skyfleet-ops
 ```
 
 The `database/` directory in the project root maps to `/app/database` in the container. The backend writes `skyfleet.db` to this path.

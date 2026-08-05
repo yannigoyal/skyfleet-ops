@@ -1,0 +1,13 @@
+{
+  "name": "skyfleet-tools",
+  "owner": {
+    "name": "Yanni Goel"
+  },
+  "plugins": [
+    {
+      "name": "independent-reviewer",
+      "source": "./Independent-Reviewer",
+      "description": "Automatically review project changes using Codex CLI."
+    }
+  ]
+}
