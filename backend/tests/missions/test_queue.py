@@ -75,6 +75,33 @@ class TestRecordFailure:
         assert queue.record_failure("does-not-exist", "err") is None
 
 
+class TestSnapshotIsolation:
+    def test_due_returns_copies_not_live_references(self):
+        queue = MissionQueue()
+        queue.enqueue("Riverside", 4.2)
+        snapshot = queue.due()[0]
+        snapshot.attempts = 99
+        snapshot.last_error = "tampered"
+        assert queue.due()[0].attempts == 0
+        assert queue.due()[0].last_error is None
+
+    def test_pending_returns_copies_not_live_references(self):
+        queue = MissionQueue()
+        queue.enqueue("Riverside", 4.2)
+        snapshot = queue.pending()[0]
+        snapshot.attempts = 99
+        assert queue.pending()[0].attempts == 0
+
+    def test_failed_returns_copies_not_live_references(self):
+        queue = MissionQueue()
+        entry = queue.enqueue("Riverside", 4.2)
+        for _ in range(MAX_ASSIGNMENT_ATTEMPTS):
+            queue.record_failure(entry.id, "err")
+        snapshot = queue.failed()[0]
+        snapshot.last_error = "tampered"
+        assert queue.failed()[0].last_error == "err"
+
+
 class TestRemove:
     def test_remove_clears_pending_entry(self):
         queue = MissionQueue()
