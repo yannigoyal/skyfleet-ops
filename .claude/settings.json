@@ -1,17 +1,17 @@
-{
-  "hooks": {
-    "Stop": [
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "echo \"Claude finished at $(date)\" >> hook.log"
-          }
-        ]
-      }
-    ]
-  },
-  "enabledPlugins": {
-    "independent-reviewer@skyfleet-tools": true
-  }
-}
+// {
+//   "hooks": {
+//     "Stop": [
+//       {
+//         "hooks": [
+//           {
+//             "type": "command",
+//             "command": "echo \"Claude finished at $(date)\" >> hook.log"
+//           }
+//         ]
+//       }
+//     ]
+//   },
+//   "enabledPlugins": {
+//     "independent-reviewer@skyfleet-tools": true
+//   }
+// }
