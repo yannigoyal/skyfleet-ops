@@ -75,7 +75,7 @@ class MissionQueue:
         """Snapshot of queued requests whose backoff window has elapsed."""
         now = now if now is not None else time.time()
         with self._lock:
-            return [entry for entry in self._pending.values() if entry.next_attempt_at <= now]
+            return [replace(entry) for entry in self._pending.values() if entry.next_attempt_at <= now]
 
     def remove(self, mission_id: str) -> None:
         with self._lock:
@@ -102,11 +102,11 @@ class MissionQueue:
 
     def pending(self) -> list[QueuedMission]:
         with self._lock:
-            return list(self._pending.values())
+            return [replace(entry) for entry in self._pending.values()]
 
     def failed(self) -> list[QueuedMission]:
         with self._lock:
-            return list(self._failed.values())
+            return [replace(entry) for entry in self._failed.values()]
 
     def __len__(self) -> int:
         with self._lock:
