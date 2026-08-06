@@ -15,7 +15,7 @@ from __future__ import annotations
 
 import time
 import uuid
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from threading import Lock
 from typing import Any
 
@@ -98,7 +98,7 @@ class MissionQueue:
                     RETRY_BACKOFF_MAX_SECONDS,
                 )
                 entry.next_attempt_at = time.time() + backoff
-            return entry
+            return replace(entry)
 
     def pending(self) -> list[QueuedMission]:
         with self._lock:

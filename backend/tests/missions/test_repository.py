@@ -8,7 +8,11 @@ from datetime import datetime, timedelta, timezone
 import pytest
 
 from app.missions import repository
-from app.missions.models import DroneAlreadyEnRouteError, InsufficientBudgetError, NoActiveMissionError
+from app.missions.models import (
+    DroneAlreadyEnRouteError,
+    InsufficientBudgetError,
+    NoActiveMissionError,
+)
 
 
 class TestRosterQueries:
@@ -77,7 +81,7 @@ class TestCreateMission:
         await repository.create_mission(db, "FALCON-01", "Riverside", 4.2, 3.36)
         mission2 = await repository.create_mission(db, "FALCON-02", "Downtown", 2.0, 1.6)
         assert mission2.status == "en_route"
-        assert await repository.get_remaining_kwh(db) == 500.0 - 3.36 - 1.6
+        assert await repository.get_remaining_kwh(db) == pytest.approx(500.0 - 3.36 - 1.6)
 
 
 class TestRecall:

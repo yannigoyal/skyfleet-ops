@@ -18,7 +18,13 @@ from app.db import Database
 from app.telemetry import TelemetryCache
 
 from . import repository
-from .models import UNSAFE_TELEMETRY_STATUSES, DroneUnavailableError, Mission, NoEligibleDroneError, UnknownDroneError
+from .models import (
+    UNSAFE_TELEMETRY_STATUSES,
+    DroneUnavailableError,
+    Mission,
+    NoEligibleDroneError,
+    UnknownDroneError,
+)
 
 
 async def launch_mission(

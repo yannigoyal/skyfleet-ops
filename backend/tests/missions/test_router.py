@@ -12,7 +12,7 @@ from .conftest import seed_telemetry
 
 def _client(db, cache, queue: MissionQueue | None = None) -> TestClient:
     app = FastAPI()
-    app.include_router(create_missions_router(db, cache, queue or MissionQueue()))
+    app.include_router(create_missions_router(db, cache, queue if queue is not None else MissionQueue()))
     return TestClient(app)
 
 
