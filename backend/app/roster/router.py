@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Response
 from pydantic import BaseModel, Field
 
 from app.db import Database
@@ -55,5 +55,13 @@ def create_roster_router(
         except RosterError as exc:
             raise _error_response(exc) from exc
         return _entry_response(entry, cache)
+
+    @router.delete("/{drone_id}", status_code=204)
+    async def remove_drone(drone_id: str):
+        try:
+            await service.remove_drone(db, source, drone_id)
+        except RosterError as exc:
+            raise _error_response(exc) from exc
+        return Response(status_code=204)
 
     return router
