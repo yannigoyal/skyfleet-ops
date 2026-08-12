@@ -9,10 +9,10 @@ Requirements for this milestone (the entire remaining scope of PLAN.md). Databas
 
 ### Roster
 
-- [x] **ROST-01**: Operator can add a drone to the fleet roster via `POST /api/roster`
+- [ ] **ROST-01**: Operator can add a drone to the fleet roster via `POST /api/roster`
 - [ ] **ROST-02**: Operator can remove a drone from the fleet roster via `DELETE /api/roster/{drone_id}`
-- [x] **ROST-03**: Operator can view the current fleet roster with latest telemetry via `GET /api/roster`
-- [x] **ROST-04**: Roster module (`backend/app/roster/`) follows the same models/service/repository/router layering as `backend/app/missions/`
+- [ ] **ROST-03**: Operator can view the current fleet roster with latest telemetry via `GET /api/roster`
+- [ ] **ROST-04**: Roster module (`backend/app/roster/`) follows the same models/service/repository/router layering as `backend/app/missions/`
 
 ### Chat (AI Flight Director)
 
@@ -83,10 +83,10 @@ Deferred — not part of this milestone.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| ROST-01 | Phase 1 | Complete |
+| ROST-01 | Phase 1 | Gaps Found |
 | ROST-02 | Phase 1 | Pending |
-| ROST-03 | Phase 1 | Complete |
-| ROST-04 | Phase 1 | Complete |
+| ROST-03 | Phase 1 | Gaps Found |
+| ROST-04 | Phase 1 | Gaps Found |
 | CHAT-01 | Phase 2 | Pending |
 | CHAT-02 | Phase 2 | Pending |
 | CHAT-03 | Phase 2 | Pending |
