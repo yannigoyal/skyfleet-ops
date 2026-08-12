@@ -42,7 +42,7 @@ Decimal phases appear between their surrounding integers in numeric order.
   3. `GET /api/roster` returns the current roster merged with each drone's latest telemetry reading
   4. The roster module (`backend/app/roster/`) is organized as models/service/repository/router, mirroring `backend/app/missions/`
 
-**Plans:** 4 plans (3 executed, 1 gap-closure pending)
+**Plans:** 4/4 plans executed (3 executed, 1 gap-closure pending)
 
 Plans:
 **Wave 1**
@@ -59,7 +59,7 @@ Plans:
 
 **Gap closure** *(from 01-VERIFICATION.md Gap 1 — run via `/gsd-execute-phase 1 --gaps-only`)*
 
-- [ ] 01-04-PLAN.md — Close the ROST-02 check→recall race: guard `remove_drone`'s recall with `except NoActiveMissionError` so DELETE returns 204 instead of an unhandled 500 when the delivery scheduler resolves the mission mid-window (REVIEW CR-01, SECURITY T-01-09)
+- [x] 01-04-PLAN.md — Close the ROST-02 check→recall race: guard `remove_drone`'s recall with `except NoActiveMissionError` so DELETE returns 204 instead of an unhandled 500 when the delivery scheduler resolves the mission mid-window (REVIEW CR-01, SECURITY T-01-09)
 
 ### Phase 2: AI Flight Director Chat
 
@@ -117,7 +117,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Roster Module | 3/4 | Gap closure pending |  |
+| 1. Roster Module | 4/4 | In Progress|  |
 | 2. AI Flight Director Chat | 0/TBD | Not started | - |
 | 3. Frontend Buildout | 0/TBD | Not started | - |
 | 4. Docker Packaging & Test Suites | 0/TBD | Not started | - |
