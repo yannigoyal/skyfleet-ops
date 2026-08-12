@@ -7,6 +7,8 @@ import importlib
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
 
+from app.missions import MissionQueue, create_missions_router
+from app.missions.repository import mark_delivered
 from app.roster import create_roster_router, repository
 from app.roster import service as roster_service
 from app.roster.models import RosterEntry
@@ -18,6 +20,17 @@ from .conftest import FakeSource, seed_telemetry
 def _client(db, cache, source: TelemetrySource | None = None) -> TestClient:
     app = FastAPI()
     app.include_router(create_roster_router(db, cache, source))
+    return TestClient(app)
+
+
+def _client_with_missions(db, cache, source: TelemetrySource | None = None) -> TestClient:
+    """Mount both the roster and missions routers on one app so a mission can
+    be launched over HTTP inside the TestClient's own event loop — Database's
+    asyncio.Lock must not be first used from a different loop than the one
+    serving the request."""
+    app = FastAPI()
+    app.include_router(create_roster_router(db, cache, source))
+    app.include_router(create_missions_router(db, cache, MissionQueue()))
     return TestClient(app)
 
 
@@ -93,6 +106,39 @@ class TestRemoveDrone:
         response = client.delete("/api/roster/FALCON-01")
         assert response.status_code == 204
         assert source.get_drone_ids() == []
+
+
+class TestRemoveDroneMidWindowRace:
+    def test_scheduler_delivers_mission_inside_check_recall_window_returns_204(
+        self, db, cache, monkeypatch
+    ):
+        """Reproduces the delivery-scheduler race: the mission resolves to
+        `delivered` between remove_drone's check and its recall call. DELETE
+        must still return 204, not an unhandled 500 (ROST-02-TOCTOU)."""
+        seed_telemetry(cache, "FALCON-01")
+        client = _client_with_missions(db, cache)
+
+        launch_response = client.post(
+            "/api/fleet/missions",
+            json={"drone_id": "FALCON-01", "zone": "Riverside", "distance_km": 4.0},
+        )
+        assert launch_response.status_code == 201
+
+        real_check = roster_service.get_active_mission_for_drone
+
+        async def wrapper(db_arg, drone_id, *args, **kwargs):
+            mission = await real_check(db_arg, drone_id, *args, **kwargs)
+            if mission is not None:
+                await mark_delivered(db_arg, mission.id)
+            return mission
+
+        monkeypatch.setattr(roster_service, "get_active_mission_for_drone", wrapper)
+
+        response = client.delete("/api/roster/FALCON-01")
+        assert response.status_code == 204
+
+        drone_ids = [d["drone_id"] for d in client.get("/api/roster").json()["drones"]]
+        assert "FALCON-01" not in drone_ids
 
 
 class TestAppWiring:
