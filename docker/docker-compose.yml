@@ -10,7 +10,4 @@ services:
     env_file:
       - ../.env
     volumes:
-      - skyfleet-data:/app/database
-
-volumes:
-  skyfleet-data:
+      - ../database:/app/database

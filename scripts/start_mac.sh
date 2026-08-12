@@ -29,10 +29,12 @@ if docker ps -a --format '{{.Names}}' | grep -q "^${CONTAINER_NAME}\$"; then
   docker rm -f "$CONTAINER_NAME" >/dev/null
 fi
 
+mkdir -p database
+
 echo "Starting $CONTAINER_NAME on port $PORT..."
 docker run -d \
   --name "$CONTAINER_NAME" \
-  -v skyfleet-data:/app/database \
+  -v "$ROOT_DIR/database:/app/database" \
   -p "${PORT}:8000" \
   --env-file .env \
   "$IMAGE_NAME"

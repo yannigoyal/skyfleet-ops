@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Stop and remove the SkyFleet Ops container. Data volume is preserved. Idempotent.
+# Stop and remove the SkyFleet Ops container. The database/ directory is preserved. Idempotent.
 set -euo pipefail
 
 CONTAINER_NAME="skyfleet-ops"

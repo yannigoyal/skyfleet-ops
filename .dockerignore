@@ -1,0 +1,57 @@
+# --- VCS & CI ---
+.git
+.gitignore
+.github
+
+# --- Secrets (injected at runtime via --env-file) ---
+.env
+.env.local
+
+# --- Python ---
+**/.venv
+**/__pycache__
+**/*.py[cod]
+**/*.egg-info
+**/.pytest_cache
+**/.ruff_cache
+**/.coverage
+**/htmlcov
+
+# --- Node / Next.js ---
+**/node_modules
+frontend/.next
+frontend/out
+
+# --- Runtime data (bind-mounted at /app/database) ---
+database/*.db
+database/*.db-journal
+database/*.db-shm
+database/*.db-wal
+database/*.sqlite3
+
+# --- Not needed in the image ---
+tests
+planning
+docs
+scripts
+docker
+Independent-Reviewer
+**/*.log
+**/*.md
+!backend/README.md
+.claude
+.vscode
+.idea
+.DS_Store
+
+# Shell/editor dotfiles that some sandboxed dev environments mount into the
+# project root as /dev/null device nodes — irregular files break context tarring.
+.bashrc
+.bash_profile
+.zshrc
+.zprofile
+.profile
+.gitconfig
+.gitmodules
+.ripgreprc
+.mcp.json

@@ -14,7 +14,7 @@ if (-not (Test-Path ".env")) {
 }
 
 $Build = $args -contains "--build"
-$ImageExists = docker image inspect $ImageName 2>$null
+$ImageExists = docker images -q $ImageName
 
 if ($Build -or -not $ImageExists) {
     Write-Host "Building $ImageName..."
@@ -27,10 +27,12 @@ if ($Existing) {
     docker rm -f $ContainerName | Out-Null
 }
 
+New-Item -ItemType Directory -Force -Path "database" | Out-Null
+
 Write-Host "Starting $ContainerName on port $Port..."
 docker run -d `
   --name $ContainerName `
-  -v skyfleet-data:/app/database `
+  -v "${RootDir}\database:/app/database" `
   -p "${Port}:8000" `
   --env-file .env `
   $ImageName

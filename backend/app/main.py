@@ -11,6 +11,7 @@ from pathlib import Path
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 
+from app.chat import create_chat_router
 from app.db import Database
 from app.missions import (
     MissionQueue,
@@ -19,6 +20,7 @@ from app.missions import (
     run_budget_snapshot_loop,
     run_delivery_scheduler,
 )
+from app.roster import create_roster_router
 from app.telemetry import TelemetryCache, create_stream_router, create_telemetry_source
 
 logging.basicConfig(level=logging.INFO)
@@ -49,6 +51,7 @@ def _default_db_path() -> Path:
 
 
 telemetry_cache = TelemetryCache()
+telemetry_source = create_telemetry_source(telemetry_cache)
 mission_queue = MissionQueue()
 database = Database(_default_db_path())
 
@@ -57,9 +60,8 @@ database = Database(_default_db_path())
 async def lifespan(app: FastAPI):
     database.ensure_initialized()
 
-    source = create_telemetry_source(telemetry_cache)
-    await source.start(DEFAULT_FLEET)
-    app.state.telemetry_source = source
+    await telemetry_source.start(DEFAULT_FLEET)
+    app.state.telemetry_source = telemetry_source
 
     background_tasks = [
         asyncio.create_task(run_assignment_scheduler(database, telemetry_cache, mission_queue)),
@@ -73,13 +75,15 @@ async def lifespan(app: FastAPI):
     for task in background_tasks:
         task.cancel()
     await asyncio.gather(*background_tasks, return_exceptions=True)
-    await source.stop()
+    await telemetry_source.stop()
     logger.info("SkyFleet Ops backend stopped")
 
 
 app = FastAPI(title="SkyFleet Ops", lifespan=lifespan)
 app.include_router(create_stream_router(telemetry_cache))
 app.include_router(create_missions_router(database, telemetry_cache, mission_queue))
+app.include_router(create_roster_router(database, telemetry_cache, telemetry_source))
+app.include_router(create_chat_router(database, telemetry_cache, telemetry_source))
 
 
 @app.get("/api/health")

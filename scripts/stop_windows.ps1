@@ -1,4 +1,4 @@
-# Stop and remove the SkyFleet Ops container. Data volume is preserved. Idempotent.
+# Stop and remove the SkyFleet Ops container. The database/ directory is preserved. Idempotent.
 $ErrorActionPreference = "Stop"
 
 $ContainerName = "skyfleet-ops"

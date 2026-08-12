@@ -1,4 +1,5 @@
 import type { TelemetrySnapshot } from "@/types/telemetry";
+import { Sparkline } from "./Sparkline";
 
 const STATUS_LABEL: Record<string, string> = {
   idle: "Idle",
@@ -16,16 +17,17 @@ function batteryColor(pct: number): string {
 
 interface Props {
   snapshot: TelemetrySnapshot;
+  history: Record<string, number[]>;
   selectedDroneId: string | null;
   onSelect: (droneId: string) => void;
 }
 
 /** Live-updating grid of tracked drones — battery, altitude, speed, status. */
-export function FleetRosterPanel({ snapshot, selectedDroneId, onSelect }: Props) {
+export function FleetRosterPanel({ snapshot, history, selectedDroneId, onSelect }: Props) {
   const drones = Object.values(snapshot).sort((a, b) => a.drone_id.localeCompare(b.drone_id));
 
   return (
-    <div className="rounded-lg border border-ops-border bg-ops-panel">
+    <div data-testid="fleet-roster" className="rounded-lg border border-ops-border bg-ops-panel">
       <div className="border-b border-ops-border px-4 py-2 text-sm font-semibold text-slate-300">
         Fleet Roster
       </div>
@@ -37,6 +39,7 @@ export function FleetRosterPanel({ snapshot, selectedDroneId, onSelect }: Props)
             <th className="px-4 py-2">Altitude</th>
             <th className="px-4 py-2">Speed</th>
             <th className="px-4 py-2">Status</th>
+            <th className="px-4 py-2">Battery History</th>
           </tr>
         </thead>
         <tbody>
@@ -62,12 +65,15 @@ export function FleetRosterPanel({ snapshot, selectedDroneId, onSelect }: Props)
                 <td className="px-4 py-2 text-slate-400">{reading.altitude_m.toFixed(0)}m</td>
                 <td className="px-4 py-2 text-slate-400">{reading.speed_kmh.toFixed(0)}km/h</td>
                 <td className="px-4 py-2 text-slate-400">{STATUS_LABEL[reading.status] ?? reading.status}</td>
+                <td className="px-4 py-2">
+                  <Sparkline points={history[reading.drone_id] ?? []} />
+                </td>
               </tr>
             );
           })}
           {drones.length === 0 && (
             <tr>
-              <td colSpan={5} className="px-4 py-6 text-center text-slate-500">
+              <td colSpan={6} className="px-4 py-6 text-center text-slate-500">
                 Waiting for telemetry…
               </td>
             </tr>
