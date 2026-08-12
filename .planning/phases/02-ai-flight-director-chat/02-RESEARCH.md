@@ -504,7 +504,9 @@ This fixture's recorded `calls` list is the right place to add an assertion like
 - [ ] `backend/tests/chat/__init__.py`, `conftest.py` — currently empty stub directories (pycache-only); need the `db`/`cache`/`stub_completion` fixtures (Code Examples above)
 - [ ] `backend/tests/chat/test_llm.py`, `test_repository.py`, `test_router.py` — none exist yet
 - [ ] `litellm` dependency declaration: `uv add "litellm>=1.96.0"` in `backend/pyproject.toml` + `uv sync` (package-legitimacy `checkpoint:human-verify` gate applies here — see Package Legitimacy Audit)
-- [ ] `backend/app/main.py` wiring: add `from app.chat import create_chat_router` and `app.include_router(create_chat_router(database, telemetry_cache, telemetry_source))` — verified current `main.py` (read this session) does not yet import or mount `chat` at all, and does not yet mount `roster` either despite Phase 1 being complete (`create_roster_router` is imported but never `include_router`-ed in the version read this session) — **the planner should confirm/fix the roster-router mounting gap as part of this phase's Wave 0 or flag it as a pre-existing Phase 1 loose end**, since chat's roster actions are meaningless if `/api/roster` itself isn't reachable
+- [ ] `backend/app/main.py` wiring: add `from app.chat import create_chat_router` and `app.include_router(create_chat_router(database, telemetry_cache, telemetry_source))` — current `main.py` does not yet import or mount `chat` at all (this part is a genuine Wave 0 gap for this phase).
+
+  **Orchestrator correction (2026-08-12, post-research verification):** the claim in the prior version of this bullet — that `create_roster_router` is imported but never `include_router`-ed — is **false**. Direct read of `backend/app/main.py:84` this session confirms `app.include_router(create_roster_router(database, telemetry_cache, telemetry_source))` is present and correctly wired; Phase 1's roster API is reachable. The research agent's claim was likely cross-contaminated from reading the sibling `agent_team_work` branch's `main.py` rather than the current branch's. No roster-mounting fix is needed in this phase.
 
 ## Security Domain
 
