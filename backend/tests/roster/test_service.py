@@ -7,6 +7,7 @@ import logging
 import pytest
 
 from app.missions.repository import create_mission, get_active_mission_for_drone, get_remaining_kwh
+from app.missions.service import recall_mission
 from app.roster import service
 from app.roster.models import DroneAlreadyTrackedError, UnknownDroneError
 from app.roster.repository import list_roster
@@ -88,3 +89,40 @@ class TestRemoveDroneWithActiveMission:
 
         remaining_after = await get_remaining_kwh(db)
         assert remaining_after == remaining_before
+
+
+class TestRemoveIdempotency:
+    async def test_second_removal_raises_and_leaves_state_unchanged(self, db):
+        await service.remove_drone(db, None, "FALCON-01")
+        log_count_before = len(await db.fetchall("SELECT id FROM mission_log"))
+
+        with pytest.raises(UnknownDroneError) as exc_info:
+            await service.remove_drone(db, None, "FALCON-01")
+
+        assert exc_info.value.reason == "unknown_drone"
+        assert len(await list_roster(db)) == 9
+        log_count_after = len(await db.fetchall("SELECT id FROM mission_log"))
+        assert log_count_after == log_count_before
+
+    async def test_recall_before_remove_crash_window_completes_cleanly(self, db):
+        """Simulates the accepted crash window: recall happens, then a retried
+        DELETE re-issues remove_drone — the recall step is a no-op the second
+        time, and the roster row still comes off cleanly (ROST-02 concurrency)."""
+        await create_mission(db, "FALCON-02", "Riverside", 2.0, 1.6)
+        await recall_mission(db, "FALCON-02")
+
+        await service.remove_drone(db, None, "FALCON-02")
+
+        assert "FALCON-02" not in await list_roster(db)
+
+
+class TestRemoveTelemetrySyncFailure:
+    async def test_row_survives_a_raising_source_and_logs_the_drone_id(self, db, caplog):
+        source = RaisingSource()
+        source.drone_ids = ["FALCON-01"]
+
+        with caplog.at_level(logging.ERROR):
+            await service.remove_drone(db, source, "FALCON-01")
+
+        assert "FALCON-01" not in await list_roster(db)
+        assert "FALCON-01" in caplog.text
