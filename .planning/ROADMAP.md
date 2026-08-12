@@ -16,6 +16,7 @@ finalized to be meaningful, and reuse the `LLM_MOCK` path already proven out in 
 ## Phases
 
 **Phase Numbering:**
+
 - Integer phases (1, 2, 3): Planned milestone work
 - Decimal phases (2.1, 2.2): Urgent insertions (marked with INSERTED)
 
@@ -29,60 +30,80 @@ Decimal phases appear between their surrounding integers in numeric order.
 ## Phase Details
 
 ### Phase 1: Roster Module
+
 **Goal**: Operator can manage the fleet roster through the API, kept in sync with live telemetry, using the same layered pattern as the existing missions module.
 **Mode:** mvp
 **Depends on**: Nothing (builds on the already-complete DB/Telemetry/Missions layers)
 **Requirements**: ROST-01, ROST-02, ROST-03, ROST-04
 **Success Criteria** (what must be TRUE):
+
   1. Operator can add a drone via `POST /api/roster` and it immediately appears in the roster with live telemetry from the `TelemetrySource`
   2. Operator can remove a drone via `DELETE /api/roster/{drone_id}` and it stops appearing in the roster, dispatch options, and telemetry stream
   3. `GET /api/roster` returns the current roster merged with each drone's latest telemetry reading
   4. The roster module (`backend/app/roster/`) is organized as models/service/repository/router, mirroring `backend/app/missions/`
+
 **Plans:** 3 plans
 
 Plans:
+**Wave 1**
+
 - [ ] 01-01-PLAN.md — Tracer: add a drone end-to-end (router → service → repository → SQLite → TelemetrySource) and mount the roster router in `app.main`
+
+**Wave 2** *(blocked on Wave 1 completion)*
+
 - [ ] 01-02-PLAN.md — Removal slice: `DELETE /api/roster/{drone_id}` with auto-recall of any active mission (D-03) and log-and-continue telemetry sync (D-04)
+
+**Wave 3** *(blocked on Wave 2 completion)*
+
 - [ ] 01-03-PLAN.md — Error matrix, single-operator isolation, and the ROST-04 layering assertion
 
 ### Phase 2: AI Flight Director Chat
+
 **Goal**: Operator can delegate mission and roster actions to an LLM copilot through natural-language chat, with every AI-proposed action validated exactly like manual dispatch.
 **Mode:** mvp
 **Depends on**: Phase 1 (roster.service must exist for the chat's roster_changes actions)
 **Requirements**: CHAT-01, CHAT-02, CHAT-03, CHAT-04, CHAT-05, CHAT-06, CHAT-07, CHAT-08
 **Success Criteria** (what must be TRUE):
+
   1. Operator sends a message via `POST /api/chat` and receives one complete structured JSON response containing a conversational message plus any executed actions
   2. AI-issued mission launches/recalls execute through the identical `missions.service` functions manual dispatch uses — no separate trusted write path
   3. AI-issued roster add/remove actions execute through `roster.service` the same way
   4. Chat conversation history persists in `chat_messages`, and recent turns are loaded into the prompt context for follow-up messages
   5. With `LLM_MOCK=true` the backend returns deterministic responses without calling OpenRouter; invalid or failing AI-proposed actions (unknown drone id, insufficient budget, malformed JSON) surface as readable errors in the chat response rather than crashing; real calls use an explicit `response_format` schema forced to Cerebras provider routing rather than relying on auto-detection
+
 **Plans**: TBD
 
 ### Phase 3: Frontend Buildout
+
 **Goal**: Operator has the complete ops-console UI — visualization, manual dispatch, and the AI chat panel — built against the now-stable roster/chat/telemetry/missions contracts.
 **Mode:** mvp
 **Depends on**: Phase 1, Phase 2 (chat panel needs the `/api/chat` contract; other panels only need existing REST/SSE and can start earlier)
 **Requirements**: FE-01, FE-02, FE-03, FE-04, FE-05, FE-06, FE-07, FE-08, FE-09
 **Success Criteria** (what must be TRUE):
+
   1. Each roster row shows a battery sparkline, and clicking a drone opens a detail panel showing battery, altitude, speed, and current mission over time
   2. Fleet heatmap renders drones sized by mission energy cost and colored by battery health, alongside an energy-budget line chart sourced from `GET /api/fleet/history`
   3. Missions table lists drone, zone, distance, energy cost, status, and ETA for every mission, and the dispatch bar launches/recalls missions instantly with no confirmation dialog
   4. Header shows live remaining energy budget, connection status, and active mission count
   5. The AI flight-director chat panel supports message input, scrolling conversation history, a loading indicator, and inline structured confirmation cards for AI-executed actions
+
 **Plans**: TBD
 **UI hint**: yes
 
 ### Phase 4: Docker Packaging & Test Suites
+
 **Goal**: Operator can launch the whole platform with a single command, and the remaining build (roster, chat, frontend, packaging) is verified by automated backend, frontend, and E2E test suites.
 **Mode:** mvp
 **Depends on**: Phase 1, Phase 2, Phase 3 (E2E scenarios need every API surface and the frontend finalized to be meaningful)
 **Requirements**: DEPLOY-01, DEPLOY-02, DEPLOY-03, DEPLOY-04, TEST-01, TEST-02, TEST-03, TEST-04, TEST-05
 **Success Criteria** (what must be TRUE):
+
   1. A single multi-stage Docker build (Node → Python) serves the Next.js static export and FastAPI backend together on port 8000
   2. Idempotent start/stop scripts for macOS/Linux and Windows build/run/stop the container with the volume mount and `.env` file
   3. SQLite data in `database/` persists across container restarts
   4. Backend and frontend unit test suites pass, covering roster service/repository/router logic, chat/LLM structured-output parsing and validation delegation, and the new frontend components
   5. A Playwright E2E suite, isolated via `tests/docker-compose.test.yml` and run with `LLM_MOCK=true`, passes covering fresh start, roster add/remove, mission launch/recall with budget updates, visualization rendering, mocked AI chat, and SSE disconnect/reconnect resilience
+
 **Plans**: TBD
 
 ## Progress
