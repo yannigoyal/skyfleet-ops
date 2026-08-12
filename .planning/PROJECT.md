@@ -19,10 +19,10 @@ The dispatcher can watch a fleet of drones stream live telemetry, launch/recall 
 - ✓ SQLite database layer: lazy init, schema, seed data (`backend/app/db/`) — db phase
 - ✓ Fleet operations service/repository/router: atomic mission launch/recall, energy-budget accounting, mission queue, assignment scheduler (`backend/app/missions/`, 962 lines) — missions phase
 - ✓ Next.js frontend shell: header, connection-status dot, fleet roster panel, SSE consumption hook (`frontend/src/`) — telemetry phase
+- ✓ Roster management module (`backend/app/roster/`: models/service/repository/router mirroring the `missions/` shape) — add/remove/view tracked drones, kept in sync with live telemetry, including the check→recall race guard for concurrent mission resolution — Phase 1
 
 ### Active
 
-- [ ] Roster management module (`backend/app/roster/` — currently an empty stub): models/service/repository/router mirroring the `missions/` shape, add/remove tracked drones
 - [ ] LLM flight-director chat (`backend/app/chat/` — currently an empty stub): structured-output mission dispatch and roster changes via LiteLLM → OpenRouter (Cerebras/gpt-oss-120b), delegating to the *same* `missions.service` / `roster.service` functions used by manual dispatch — no separate "trusted" write path
 - [ ] LLM mock mode (`LLM_MOCK=true`) for deterministic testing without API calls
 - [ ] Frontend buildout: drone detail panel, fleet heatmap (treemap), energy-budget chart, missions table, dispatch bar, AI chat panel with inline action-confirmation cards
@@ -86,4 +86,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-08-12 after initialization*
+*Last updated: 2026-08-12 — Phase 1 (Roster Module) complete*
