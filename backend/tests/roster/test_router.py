@@ -8,27 +8,7 @@ from fastapi.testclient import TestClient
 from app.roster import create_roster_router
 from app.telemetry import TelemetrySource
 
-from .conftest import seed_telemetry
-
-
-class FakeSource(TelemetrySource):
-    def __init__(self) -> None:
-        self.drone_ids: list[str] = []
-
-    async def start(self, drone_ids: list[str]) -> None:
-        self.drone_ids = list(drone_ids)
-
-    async def stop(self) -> None:
-        pass
-
-    async def add_drone(self, drone_id: str) -> None:
-        self.drone_ids.append(drone_id)
-
-    async def remove_drone(self, drone_id: str) -> None:
-        self.drone_ids.remove(drone_id)
-
-    def get_drone_ids(self) -> list[str]:
-        return list(self.drone_ids)
+from .conftest import FakeSource, seed_telemetry
 
 
 def _client(db, cache, source: TelemetrySource | None = None) -> TestClient:
