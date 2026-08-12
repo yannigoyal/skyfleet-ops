@@ -5,6 +5,7 @@ from __future__ import annotations
 import logging
 
 from app.db import Database
+from app.missions.models import NoActiveMissionError
 from app.missions.repository import get_active_mission_for_drone
 from app.missions.service import recall_mission
 from app.telemetry import TelemetrySource
@@ -55,9 +56,23 @@ async def remove_drone(db: Database, source: TelemetrySource | None, drone_id: s
     (accepted tradeoff, D-03's costly reversibility rating). A crash between
     them leaves the mission recalled with the drone still on the roster;
     re-issuing DELETE finishes the job because step 1 becomes a no-op.
+
+    The check and the recall step are still two separate awaits, so a
+    concurrent writer (the 5-second delivery scheduler, or a manual recall
+    racing this same request) can resolve the mission in the window between
+    them. If that happens, the recall raises NoActiveMissionError — a mission
+    that reached a terminal state on its own already satisfies the removal's
+    precondition, so that one exception is caught here and treated as
+    recall-complete rather than propagated as a failure.
     """
     if await get_active_mission_for_drone(db, drone_id) is not None:
-        await recall_mission(db, drone_id)
+        try:
+            await recall_mission(db, drone_id)
+        except NoActiveMissionError:
+            logger.info(
+                "mission for %s already resolved before recall; treating roster removal as recall-complete",
+                drone_id,
+            )
 
     await repository.remove_drone(db, drone_id)
 

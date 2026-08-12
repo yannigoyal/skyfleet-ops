@@ -6,13 +6,36 @@ import logging
 
 import pytest
 
-from app.missions.repository import create_mission, get_active_mission_for_drone, get_remaining_kwh
+from app.missions.models import DroneUnavailableError
+from app.missions.repository import (
+    create_mission,
+    get_active_mission_for_drone,
+    get_remaining_kwh,
+    mark_delivered,
+)
 from app.missions.service import recall_mission
 from app.roster import service
 from app.roster.models import DroneAlreadyTrackedError, UnknownDroneError
 from app.roster.repository import list_roster
 
 from .conftest import FakeSource, RaisingSource
+
+
+def _racing_check(resolve):
+    """Wrap service.get_active_mission_for_drone so that, when it finds an
+    en_route mission, `resolve(mission)` runs inside the check->recall window
+    before the now-stale mission is handed back to the caller — reproducing
+    a concurrent writer (the delivery scheduler or a manual recall) winning
+    the race against remove_drone's own recall step."""
+    real_check = service.get_active_mission_for_drone
+
+    async def wrapper(db_arg, drone_id, *args, **kwargs):
+        mission = await real_check(db_arg, drone_id, *args, **kwargs)
+        if mission is not None:
+            await resolve(mission)
+        return mission
+
+    return wrapper
 
 
 class TestAddDrone:
@@ -125,4 +148,99 @@ class TestRemoveTelemetrySyncFailure:
             await service.remove_drone(db, source, "FALCON-01")
 
         assert "FALCON-01" not in await list_roster(db)
+        assert "FALCON-01" in caplog.text
+
+
+class TestRemoveDroneMidWindowRace:
+    async def test_scheduler_delivery_variant_preserves_terminal_status_and_no_recall_log(
+        self, db, monkeypatch
+    ):
+        await create_mission(db, "FALCON-01", "Riverside", 4.0, 3.2)
+        monkeypatch.setattr(
+            service, "get_active_mission_for_drone", _racing_check(lambda m: mark_delivered(db, m.id))
+        )
+
+        await service.remove_drone(db, None, "FALCON-01")
+
+        assert "FALCON-01" not in await list_roster(db)
+        mission_row = await db.fetchone(
+            "SELECT status FROM missions WHERE drone_id = ?", ("FALCON-01",)
+        )
+        assert mission_row["status"] == "delivered"
+        recall_row = await db.fetchone(
+            "SELECT COUNT(*) AS c FROM mission_log WHERE drone_id = ? AND action = 'recall'",
+            ("FALCON-01",),
+        )
+        assert recall_row["c"] == 0
+
+    async def test_concurrent_manual_recall_variant_preserves_single_recall_log_and_budget(
+        self, db, monkeypatch
+    ):
+        await create_mission(db, "FALCON-02", "Riverside", 2.0, 1.6)
+        captured: dict[str, float] = {}
+
+        async def resolve(mission):
+            await recall_mission(db, mission.drone_id)
+            captured["remaining_after_resolution"] = await get_remaining_kwh(db)
+
+        monkeypatch.setattr(service, "get_active_mission_for_drone", _racing_check(resolve))
+
+        await service.remove_drone(db, None, "FALCON-02")
+
+        assert "FALCON-02" not in await list_roster(db)
+        mission_row = await db.fetchone(
+            "SELECT status FROM missions WHERE drone_id = ?", ("FALCON-02",)
+        )
+        assert mission_row["status"] == "recalled"
+        recall_row = await db.fetchone(
+            "SELECT COUNT(*) AS c FROM mission_log WHERE drone_id = ? AND action = 'recall'",
+            ("FALCON-02",),
+        )
+        assert recall_row["c"] == 1
+
+        remaining_after_removal = await get_remaining_kwh(db)
+        assert remaining_after_removal == captured["remaining_after_resolution"]
+
+    async def test_idempotent_after_race_second_removal_raises_unknown_drone(self, db, monkeypatch):
+        await create_mission(db, "FALCON-01", "Riverside", 4.0, 3.2)
+        monkeypatch.setattr(
+            service, "get_active_mission_for_drone", _racing_check(lambda m: mark_delivered(db, m.id))
+        )
+
+        await service.remove_drone(db, None, "FALCON-01")
+        roster_count_before = len(await list_roster(db))
+        log_count_before = len(await db.fetchall("SELECT id FROM mission_log"))
+
+        with pytest.raises(UnknownDroneError) as exc_info:
+            await service.remove_drone(db, None, "FALCON-01")
+
+        assert exc_info.value.reason == "unknown_drone"
+        assert len(await list_roster(db)) == roster_count_before
+        log_count_after = len(await db.fetchall("SELECT id FROM mission_log"))
+        assert log_count_after == log_count_before
+
+
+class TestRemoveDroneCatchNarrowness:
+    async def test_different_mission_error_propagates_and_leaves_roster_row(self, db, monkeypatch):
+        await create_mission(db, "FALCON-01", "Riverside", 4.0, 3.2)
+
+        async def raising_recall(db_arg, drone_id):
+            raise DroneUnavailableError(drone_id)
+
+        monkeypatch.setattr(service, "recall_mission", raising_recall)
+
+        with pytest.raises(DroneUnavailableError):
+            await service.remove_drone(db, None, "FALCON-01")
+
+        assert "FALCON-01" in await list_roster(db)
+
+    async def test_skipped_recall_logs_drone_id(self, db, caplog, monkeypatch):
+        await create_mission(db, "FALCON-01", "Riverside", 4.0, 3.2)
+        monkeypatch.setattr(
+            service, "get_active_mission_for_drone", _racing_check(lambda m: mark_delivered(db, m.id))
+        )
+
+        with caplog.at_level(logging.INFO):
+            await service.remove_drone(db, None, "FALCON-01")
+
         assert "FALCON-01" in caplog.text
