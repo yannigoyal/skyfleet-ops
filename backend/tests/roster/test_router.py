@@ -66,6 +66,31 @@ class TestAddDrone:
         assert client.post("/api/roster", json={"drone_id": ""}).status_code == 422
 
 
+class TestRemoveDrone:
+    def test_first_delete_returns_204_and_drone_disappears(self, db, cache):
+        client = _client(db, cache)
+        response = client.delete("/api/roster/FALCON-01")
+        assert response.status_code == 204
+
+        drone_ids = [d["drone_id"] for d in client.get("/api/roster").json()["drones"]]
+        assert "FALCON-01" not in drone_ids
+
+    def test_second_delete_returns_404_unknown_drone(self, db, cache):
+        client = _client(db, cache)
+        client.delete("/api/roster/FALCON-01")
+        response = client.delete("/api/roster/FALCON-01")
+        assert response.status_code == 404
+        assert response.json()["detail"]["reason"] == "unknown_drone"
+
+    def test_deregisters_from_a_working_source(self, db, cache):
+        source = FakeSource()
+        source.drone_ids = ["FALCON-01"]
+        client = _client(db, cache, source)
+        response = client.delete("/api/roster/FALCON-01")
+        assert response.status_code == 204
+        assert source.get_drone_ids() == []
+
+
 class TestAppWiring:
     def test_roster_route_mounted_and_telemetry_source_is_singleton(self):
         import app.main
