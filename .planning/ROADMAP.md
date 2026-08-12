@@ -75,7 +75,21 @@ Plans:
   4. Chat conversation history persists in `chat_messages`, and recent turns are loaded into the prompt context for follow-up messages
   5. With `LLM_MOCK=true` the backend returns deterministic responses without calling OpenRouter; invalid or failing AI-proposed actions (unknown drone id, insufficient budget, malformed JSON) surface as readable errors in the chat response rather than crashing; real calls use an explicit `response_format` schema forced to Cerebras provider routing rather than relying on auto-detection
 
-**Plans**: TBD
+**Plans:** 4 plans
+
+Plans:
+**Wave 1**
+
+- [ ] 02-01-PLAN.md — Tracer: mock-mode chat turn end-to-end (router → context → LLM seam → chat repository → SQLite → missions.service) plus the litellm legitimacy gate and the `app.main` mount
+
+**Wave 2** *(blocked on Wave 1 completion)*
+
+- [ ] 02-02-PLAN.md — CHAT-08: real LiteLLM→OpenRouter→Cerebras call with `response_format` and `provider` nested in `extra_body`, the kwarg-shape regression gate, and the gated live smoke
+- [ ] 02-03-PLAN.md — Recall and roster delegation through `missions.service` / `roster.service`, with the chat-versus-manual differential test and the import-boundary assertion
+
+**Wave 3** *(blocked on Wave 2 completion)*
+
+- [ ] 02-04-PLAN.md — CHAT-07: fourteen-scenario reference dataset and replay harness, transparency and secret-hygiene gates, and the per-turn structured log line
 
 ### Phase 3: Frontend Buildout
 
@@ -118,6 +132,6 @@ Phases execute in numeric order: 1 → 2 → 3 → 4
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Roster Module | 4/4 | Complete    | 2026-08-12 |
-| 2. AI Flight Director Chat | 0/TBD | Not started | - |
+| 2. AI Flight Director Chat | 0/4 | Not started | - |
 | 3. Frontend Buildout | 0/TBD | Not started | - |
 | 4. Docker Packaging & Test Suites | 0/TBD | Not started | - |
