@@ -42,12 +42,12 @@ Decimal phases appear between their surrounding integers in numeric order.
   3. `GET /api/roster` returns the current roster merged with each drone's latest telemetry reading
   4. The roster module (`backend/app/roster/`) is organized as models/service/repository/router, mirroring `backend/app/missions/`
 
-**Plans:** 3 plans
+**Plans:** 1/3 plans executed
 
 Plans:
 **Wave 1**
 
-- [ ] 01-01-PLAN.md — Tracer: add a drone end-to-end (router → service → repository → SQLite → TelemetrySource) and mount the roster router in `app.main`
+- [x] 01-01-PLAN.md — Tracer: add a drone end-to-end (router → service → repository → SQLite → TelemetrySource) and mount the roster router in `app.main`
 
 **Wave 2** *(blocked on Wave 1 completion)*
 
@@ -113,7 +113,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Roster Module | 0/3 | Not started | - |
+| 1. Roster Module | 1/3 | In Progress|  |
 | 2. AI Flight Director Chat | 0/TBD | Not started | - |
 | 3. Frontend Buildout | 0/TBD | Not started | - |
 | 4. Docker Packaging & Test Suites | 0/TBD | Not started | - |
