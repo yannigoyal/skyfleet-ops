@@ -38,7 +38,12 @@ Decimal phases appear between their surrounding integers in numeric order.
   2. Operator can remove a drone via `DELETE /api/roster/{drone_id}` and it stops appearing in the roster, dispatch options, and telemetry stream
   3. `GET /api/roster` returns the current roster merged with each drone's latest telemetry reading
   4. The roster module (`backend/app/roster/`) is organized as models/service/repository/router, mirroring `backend/app/missions/`
-**Plans**: TBD
+**Plans:** 3 plans
+
+Plans:
+- [ ] 01-01-PLAN.md — Tracer: add a drone end-to-end (router → service → repository → SQLite → TelemetrySource) and mount the roster router in `app.main`
+- [ ] 01-02-PLAN.md — Removal slice: `DELETE /api/roster/{drone_id}` with auto-recall of any active mission (D-03) and log-and-continue telemetry sync (D-04)
+- [ ] 01-03-PLAN.md — Error matrix, single-operator isolation, and the ROST-04 layering assertion
 
 ### Phase 2: AI Flight Director Chat
 **Goal**: Operator can delegate mission and roster actions to an LLM copilot through natural-language chat, with every AI-proposed action validated exactly like manual dispatch.
@@ -87,7 +92,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Roster Module | 0/TBD | Not started | - |
+| 1. Roster Module | 0/3 | Not started | - |
 | 2. AI Flight Director Chat | 0/TBD | Not started | - |
 | 3. Frontend Buildout | 0/TBD | Not started | - |
 | 4. Docker Packaging & Test Suites | 0/TBD | Not started | - |
