@@ -180,3 +180,7 @@ _Note: no separate plan-metadata commit — this is a parallel worktree plan; th
 ---
 *Phase: 01-roster-module*
 *Completed: 2026-08-12*
+
+## Self-Check: PASSED
+
+All 9 created files verified present on disk (`backend/app/roster/{models,repository,service,router,__init__}.py`, `backend/tests/roster/{__init__,conftest,test_router,test_service}.py`), `backend/app/main.py` modification confirmed via diff, and all 3 commit hashes (`0542dc3`, `fa00792`, `f87d4ac`) confirmed present in `git log`.
