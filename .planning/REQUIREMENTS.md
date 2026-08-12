@@ -81,46 +81,44 @@ Deferred — not part of this milestone.
 
 ## Traceability
 
-Populated during roadmap creation.
-
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| ROST-01 | TBD | Pending |
-| ROST-02 | TBD | Pending |
-| ROST-03 | TBD | Pending |
-| ROST-04 | TBD | Pending |
-| CHAT-01 | TBD | Pending |
-| CHAT-02 | TBD | Pending |
-| CHAT-03 | TBD | Pending |
-| CHAT-04 | TBD | Pending |
-| CHAT-05 | TBD | Pending |
-| CHAT-06 | TBD | Pending |
-| CHAT-07 | TBD | Pending |
-| CHAT-08 | TBD | Pending |
-| FE-01 | TBD | Pending |
-| FE-02 | TBD | Pending |
-| FE-03 | TBD | Pending |
-| FE-04 | TBD | Pending |
-| FE-05 | TBD | Pending |
-| FE-06 | TBD | Pending |
-| FE-07 | TBD | Pending |
-| FE-08 | TBD | Pending |
-| FE-09 | TBD | Pending |
-| DEPLOY-01 | TBD | Pending |
-| DEPLOY-02 | TBD | Pending |
-| DEPLOY-03 | TBD | Pending |
-| DEPLOY-04 | TBD | Pending |
-| TEST-01 | TBD | Pending |
-| TEST-02 | TBD | Pending |
-| TEST-03 | TBD | Pending |
-| TEST-04 | TBD | Pending |
-| TEST-05 | TBD | Pending |
+| ROST-01 | Phase 1 | Pending |
+| ROST-02 | Phase 1 | Pending |
+| ROST-03 | Phase 1 | Pending |
+| ROST-04 | Phase 1 | Pending |
+| CHAT-01 | Phase 2 | Pending |
+| CHAT-02 | Phase 2 | Pending |
+| CHAT-03 | Phase 2 | Pending |
+| CHAT-04 | Phase 2 | Pending |
+| CHAT-05 | Phase 2 | Pending |
+| CHAT-06 | Phase 2 | Pending |
+| CHAT-07 | Phase 2 | Pending |
+| CHAT-08 | Phase 2 | Pending |
+| FE-01 | Phase 3 | Pending |
+| FE-02 | Phase 3 | Pending |
+| FE-03 | Phase 3 | Pending |
+| FE-04 | Phase 3 | Pending |
+| FE-05 | Phase 3 | Pending |
+| FE-06 | Phase 3 | Pending |
+| FE-07 | Phase 3 | Pending |
+| FE-08 | Phase 3 | Pending |
+| FE-09 | Phase 3 | Pending |
+| DEPLOY-01 | Phase 4 | Pending |
+| DEPLOY-02 | Phase 4 | Pending |
+| DEPLOY-03 | Phase 4 | Pending |
+| DEPLOY-04 | Phase 4 | Pending |
+| TEST-01 | Phase 4 | Pending |
+| TEST-02 | Phase 4 | Pending |
+| TEST-03 | Phase 4 | Pending |
+| TEST-04 | Phase 4 | Pending |
+| TEST-05 | Phase 4 | Pending |
 
 **Coverage:**
-- v1 requirements: 29 total
-- Mapped to phases: 0 (populated by roadmapper)
-- Unmapped: 29 ⚠️ (expected — roadmap not yet created)
+- v1 requirements: 30 total
+- Mapped to phases: 30
+- Unmapped: 0 ✓
 
 ---
 *Requirements defined: 2026-08-12*
-*Last updated: 2026-08-12 after initial definition*
+*Last updated: 2026-08-12 after roadmap creation (corrected v1 total from 29 to 30 — recount of listed requirements)*
