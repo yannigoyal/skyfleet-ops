@@ -34,7 +34,7 @@ Requirements for this milestone (the entire remaining scope of PLAN.md). Databas
 
 ### Frontend — Dispatch & Missions
 
-- [ ] **FE-05**: Missions table shows drone, zone, distance, energy cost, status, and ETA for all missions
+- [x] **FE-05**: Missions table shows drone, zone, distance, energy cost, status, and ETA for all missions
 - [x] **FE-06**: Dispatch bar (drone field, zone field, distance field, launch button, recall button) launches/recalls missions instantly with no confirmation dialog
 - [x] **FE-07**: Header shows live remaining energy budget, connection status indicator, and active mission count
 
@@ -99,7 +99,7 @@ Deferred — not part of this milestone.
 | FE-02 | Phase 3 | Complete |
 | FE-03 | Phase 3 | Complete |
 | FE-04 | Phase 3 | Complete |
-| FE-05 | Phase 3 | Pending |
+| FE-05 | Phase 3 | Complete |
 | FE-06 | Phase 3 | Complete |
 | FE-07 | Phase 3 | Complete |
 | FE-08 | Phase 3 | Complete |
