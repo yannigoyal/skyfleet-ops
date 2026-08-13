@@ -75,7 +75,7 @@ Plans:
   4. Chat conversation history persists in `chat_messages`, and recent turns are loaded into the prompt context for follow-up messages
   5. With `LLM_MOCK=true` the backend returns deterministic responses without calling OpenRouter; invalid or failing AI-proposed actions (unknown drone id, insufficient budget, malformed JSON) surface as readable errors in the chat response rather than crashing; real calls use an explicit `response_format` schema forced to Cerebras provider routing rather than relying on auto-detection
 
-**Plans:** 2/4 plans executed
+**Plans:** 3/4 plans executed
 
 Plans:
 **Wave 1**
@@ -84,7 +84,7 @@ Plans:
 
 **Wave 2** *(blocked on Wave 1 completion)*
 
-- [ ] 02-02-PLAN.md — CHAT-08: real LiteLLM→OpenRouter→Cerebras call with `response_format` and `provider` nested in `extra_body`, the kwarg-shape regression gate, and the gated live smoke
+- [x] 02-02-PLAN.md — CHAT-08: real LiteLLM→OpenRouter→Cerebras call with `response_format` and `provider` nested in `extra_body`, the kwarg-shape regression gate, and the gated live smoke
 - [x] 02-03-PLAN.md — Recall and roster delegation through `missions.service` / `roster.service`, with the chat-versus-manual differential test and the import-boundary assertion
 
 **Wave 3** *(blocked on Wave 2 completion)*

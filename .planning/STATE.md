@@ -5,15 +5,15 @@ milestone_name: milestone
 current_phase: 2
 current_phase_name: AI Flight Director Chat
 status: executing
-stopped_at: Completed 02-03-PLAN.md
-last_updated: "2026-08-13T01:29:14.583Z"
-last_activity: 2026-08-12
-last_activity_desc: Roadmap created (4 phases, 30/30 v1 requirements mapped)
+stopped_at: Completed 02-02-PLAN.md and 02-03-PLAN.md (wave 2, parallel)
+last_updated: "2026-08-13T01:31:44.420Z"
+last_activity: 2026-08-13
+last_activity_desc: Phase 02 wave 2 complete (02-02, 02-03); wave 3 (02-04) remaining
 progress:
   total_phases: 2
   completed_phases: 1
   total_plans: 8
-  completed_plans: 6
+  completed_plans: 7
 ---
 
 # Project State
@@ -28,11 +28,11 @@ See: .planning/PROJECT.md (updated 2026-08-12)
 ## Current Position
 
 Phase: 2 — AI Flight Director Chat
-Plan: Not started
-Status: Ready to execute
-Last activity: 2026-08-12 — Phase 01 complete, transitioned to Phase 2
+Plan: 4 of 4 (02-04 remaining)
+Status: Executing — wave 2 complete (02-02, 02-03), wave 3 (02-04) next
+Last activity: 2026-08-13 — 02-02 and 02-03 merged
 
-Progress: [████████░░] 75%
+Progress: [█████████░] 87%
 
 ## Performance Metrics
 
@@ -58,6 +58,8 @@ Progress: [████████░░] 75%
 
 | Plan | Duration | Tasks | Files |
 |------|----------|-------|-------|
+| Phase 02 P01 | 55min | 3 tasks | 12 files |
+| Phase 02 P02 | 25min | 3 tasks | 4 files |
 | Phase 02 P03 | 25min | 2 tasks | 2 files |
 
 ## Accumulated Context
@@ -70,7 +72,8 @@ Recent decisions affecting current work:
 - Milestone scope: build the entire remaining platform (roster, chat, frontend, Docker, E2E) in one milestone, not a narrower vertical slice
 - Full workflow rigor enabled (research + plan-check + verifier) for every phase — user prioritizes correctness over speed
 - Phase order follows research's dependency finding: Roster → Chat → Frontend → Docker/Test (chat's roster_changes action needs a working roster service to delegate to)
-- [Phase ?]: Chat write path reaches roster/missions only through their service modules, never persistence, enforced by an AST import-boundary test and a two-database differential test
+- [Phase 2]: Chat write path reaches roster/missions only through their service modules, never persistence, enforced by an AST import-boundary test and a two-database differential test
+- [Phase 2]: CHAT-08 fix confirmed working end to end: real litellm.acompletion call with response_format/provider nested in extra_body, verified against live OpenRouter/Cerebras endpoint (3/3 prompts passed, bare JSON, under 5s each)
 
 ### Pending Todos
 
@@ -92,6 +95,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-08-13T01:29:14.576Z
-Stopped at: Completed 02-03-PLAN.md
+Last session: 2026-08-13T01:31:44.411Z
+Stopped at: Completed 02-02-PLAN.md and 02-03-PLAN.md (wave 2)
 Resume file: None
