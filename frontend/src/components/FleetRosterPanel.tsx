@@ -9,7 +9,8 @@ const STATUS_LABEL: Record<string, string> = {
   offline: "Offline",
 };
 
-function batteryColor(pct: number): string {
+/** Shared three-band battery-health color precedent, reused by DetailPanel. */
+export function batteryColor(pct: number): string {
   if (pct <= 20) return "text-red-400";
   if (pct <= 50) return "text-ops-amber";
   return "text-emerald-400";
