@@ -20,17 +20,17 @@ The dispatcher can watch a fleet of drones stream live telemetry, launch/recall 
 - ✓ Fleet operations service/repository/router: atomic mission launch/recall, energy-budget accounting, mission queue, assignment scheduler (`backend/app/missions/`, 962 lines) — missions phase
 - ✓ Next.js frontend shell: header, connection-status dot, fleet roster panel, SSE consumption hook (`frontend/src/`) — telemetry phase
 - ✓ Roster management module (`backend/app/roster/`: models/service/repository/router mirroring the `missions/` shape) — add/remove/view tracked drones, kept in sync with live telemetry, including the check→recall race guard for concurrent mission resolution — Phase 1
+- ✓ LLM flight-director chat (`backend/app/chat/`): structured-output mission dispatch and roster changes via LiteLLM → OpenRouter (Cerebras/gpt-oss-120b), delegating to the same `missions.service` / `roster.service` functions used by manual dispatch — Phase 2
+- ✓ LLM mock mode (`LLM_MOCK=true`) for deterministic testing without API calls — Phase 2
+- ✓ Backend unit tests (pytest) for telemetry, db, missions, roster, and chat/LLM — 300 tests passing across `backend/tests/` — Phases 1-2, confirmed still green after Phase 3
+- ✓ Frontend buildout: fleet roster with battery sparklines, drone detail panel, dispatch bar (launch/recall), missions table, fleet heatmap (treemap), energy-budget chart, AI flight-director chat panel with inline action-confirmation cards — Phase 3 (`frontend/src/components/`, `frontend/src/lib/`)
+- ✓ Dark ops-console visual theme (amber/teal/signal-orange accents) applied across all frontend surfaces per `03-UI-SPEC.md` — Phase 3
+- ✓ Frontend unit tests (Vitest + Testing Library) — 81 tests across 14 files, `frontend/vitest.config.ts` — Phase 3
 
 ### Active
 
-- [ ] LLM flight-director chat (`backend/app/chat/` — currently an empty stub): structured-output mission dispatch and roster changes via LiteLLM → OpenRouter (Cerebras/gpt-oss-120b), delegating to the *same* `missions.service` / `roster.service` functions used by manual dispatch — no separate "trusted" write path
-- [ ] LLM mock mode (`LLM_MOCK=true`) for deterministic testing without API calls
-- [ ] Frontend buildout: drone detail panel, fleet heatmap (treemap), energy-budget chart, missions table, dispatch bar, AI chat panel with inline action-confirmation cards
-- [ ] Dark ops-console visual theme (amber/teal/signal-orange accents, telemetry flash animations) applied across new frontend surfaces
 - [ ] Multi-stage Docker build (Node → Python) serving frontend + backend on a single port (8000)
 - [ ] Start/stop scripts for macOS/Linux and Windows
-- [ ] Backend unit tests (pytest) for roster, chat/LLM parsing, and any gaps in mission-ops coverage
-- [ ] Frontend unit tests (React Testing Library or similar) for new components
 - [ ] Playwright E2E test suite with `docker-compose.test.yml`, run against `LLM_MOCK=true`
 
 ### Out of Scope
@@ -67,6 +67,9 @@ The dispatcher can watch a fleet of drones stream live telemetry, launch/recall 
 | Build entire remaining platform in one milestone (not a vertical slice) | User wants the complete spec delivered end-to-end per PLAN.md | — Pending |
 | Full workflow rigor (research + plan-check + verifier every phase) | User explicitly values correctness/quality over speed on this self-paced project | — Pending |
 | Docker packaging and E2E tests included in this milestone's scope | User confirmed PLAN.md's full scope, not deferred to a later pass | — Pending |
+| Phase 3 built as 6 strictly sequential waves (tracer slice first, then feature slices), one plan per wave | Every plan after 03-01 shares `page.tsx` and/or `FleetOpsProvider`; parallel execution would conflict | Shipped clean — all 6 waves merged with zero cross-plan conflicts |
+| Code review's 1 critical + 4 warning findings (incl. a real crash bug in `FleetOpsProvider.refetch()` with no error handling) fixed directly by the orchestrator rather than via the fix-agent pipeline | Fix-agent dispatch hit a session usage-quota error mid-review; findings were small, well-scoped, and already had exact suggested diffs | Fixed in commit `703dbc7`, independently re-verified by the phase verifier (tsc clean, 81/81 tests, build succeeds) |
+| Phase 3 tagged `mode: mvp` in ROADMAP.md but its goal isn't authored as a User Story | Goal was written before MVP-mode tagging was retrofitted onto the roadmap | Flagged by the verifier as unresolved — recommend `/gsd mvp-phase 3` to reformat or clearing the `mvp` flag before Phase 4 |
 
 ## Evolution
 
@@ -86,4 +89,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-08-12 — Phase 1 (Roster Module) complete*
+*Last updated: 2026-08-13 — Phase 3 (Frontend Buildout) complete*
