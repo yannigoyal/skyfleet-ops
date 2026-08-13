@@ -562,9 +562,9 @@ this phase does not require any version bumps.
 **If this table is empty:** N/A — two assumptions logged above; both are choices with documented
 fallbacks, not unverified factual claims about the codebase.
 
-## Open Questions
+## Open Questions (RESOLVED)
 
-1. **Preserve or reset the existing named-volume database data (D-01 migration)?**
+1. **Preserve or reset the existing named-volume database data (D-01 migration)?** (RESOLVED: Recommendation — Option B, reset — provided below; planner adopted it per CONTEXT.md's discretion delegation.)
    - What we know: The volume currently holds real (if just exploratory) data — 9 roster rows, 4
      mission_log rows — and both a preserve-path (checkpoint + `docker cp`) and a reset-path are
      documented above with exact commands.
@@ -574,7 +574,7 @@ fallbacks, not unverified factual claims about the codebase.
      over-engineer" stated preference, unless the user explicitly asks to preserve it — flag this
      as a one-line decision point in the plan rather than silently picking one.
 
-2. **Exact mechanism to force a visible SSE reconnect in Playwright.**
+2. **Exact mechanism to force a visible SSE reconnect in Playwright.** (RESOLVED: Recommendation — reload-based `route.abort()` — provided below; planner adopted it, with `setOffline()` documented as fallback.)
    - What we know: `route.abort()` scoped to the stream URL plus `page.reload()` is the
      Playwright-documented mechanism most likely to work deterministically (see Pattern 4).
    - What's unclear: Whether `route.abort()` alone (without reload) can break an *already open*
