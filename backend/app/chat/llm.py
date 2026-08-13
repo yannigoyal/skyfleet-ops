@@ -84,7 +84,11 @@ class MissionAction(BaseModel):
     drone_id: str
     action: Literal["launch", "recall"]
     zone: str | None = None
-    distance_km: float | None = None
+    # allow_inf_nan=False matches the manual REST dispatch model's Field(gt=0)
+    # rigor (backend/app/missions/router.py): NaN/inf comparisons are always
+    # False in Python, so a hand-rolled `<= 0` guard alone silently lets them
+    # through (CR-01).
+    distance_km: float | None = Field(default=None, allow_inf_nan=False)
 
 
 class RosterChange(BaseModel):
