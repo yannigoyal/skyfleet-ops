@@ -170,6 +170,20 @@ class TestCallFailure:
         with pytest.raises(LLMError):
             await llm.generate_reply({"remaining_kwh": 500.0}, [], "status check")
 
+    async def test_transport_exception_text_is_not_echoed_into_error_message(
+        self, real_mode, monkeypatch, stub_completion
+    ):
+        """WR-04: the third-party library's own exception text must never
+        flow unsanitized into the client-facing error."""
+        monkeypatch.setenv("OPENROUTER_API_KEY", "dummy-test-key")
+        sentinel = "internal transport detail sentinel 8f3c2a"
+        stub_completion(RuntimeError(sentinel))
+
+        with pytest.raises(LLMError) as excinfo:
+            await llm.generate_reply({"remaining_kwh": 500.0}, [], "status check")
+
+        assert sentinel not in str(excinfo.value)
+
     async def test_missing_api_key_raises_before_any_call(
         self, real_mode, monkeypatch, stub_completion
     ):

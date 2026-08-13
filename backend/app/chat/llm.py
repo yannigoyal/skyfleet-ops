@@ -230,6 +230,10 @@ async def generate_reply(
         )
         raw_content = response.choices[0].message.content
     except Exception as exc:
-        raise LLMError(f"flight director call failed: {exc}") from exc
+        # The exception text is a third-party library's own message, whose
+        # contents this codebase doesn't control -- never echo it into the
+        # client-facing 502 body. WR-01's router-side logging captures the
+        # real detail server-side via `from exc`.
+        raise LLMError("flight director call failed") from exc
 
     return parse_reply(raw_content)
