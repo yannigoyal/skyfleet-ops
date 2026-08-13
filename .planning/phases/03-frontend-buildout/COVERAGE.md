@@ -48,3 +48,8 @@ not a deferred part of an existing one. Two defensible resolutions:
    the `DispatchBar` shell and the already-built endpoints.
 
 Raised for the developer to decide; the planner did not choose unilaterally.
+
+**Resolution (2026-08-13, decided during `/gsd-plan-phase 3`):** Option 1 — accept as-is.
+Roster management stays AI-delegated only for this milestone. No FE-10 requirement, no
+seventh plan. `POST /api/roster` and `DELETE /api/roster/{drone_id}` remain OPT-OUT for
+Phase 3, reachable only via the chat panel's `roster_changes` path (FE-09/CHAT-04).
