@@ -1,0 +1,18 @@
+{
+  "id": "13-contradictory-launch-and-recall",
+  "covers": ["D6"],
+  "seed": {},
+  "user_message": "Launch FALCON-07 to Eastside, 3 km, then immediately recall it.",
+  "completion": "{\"message\": \"Launching FALCON-07 to Eastside then recalling it.\", \"missions\": [{\"drone_id\": \"FALCON-07\", \"action\": \"launch\", \"zone\": \"Eastside\", \"distance_km\": 3.0}, {\"drone_id\": \"FALCON-07\", \"action\": \"recall\", \"zone\": null, \"distance_km\": null}], \"roster_changes\": []}",
+  "expect": {
+    "status": 200,
+    "missions": [{"drone_id": "FALCON-07", "action": "launch"}, {"drone_id": "FALCON-07", "action": "recall"}],
+    "roster_changes": [],
+    "error_contains": [],
+    "mission_row_delta": 1,
+    "budget_delta_kwh": -2.4,
+    "chat_row_delta": 2,
+    "final_mission_status": {"FALCON-07": "recalled"},
+    "final_active_mission_count": 0
+  }
+}

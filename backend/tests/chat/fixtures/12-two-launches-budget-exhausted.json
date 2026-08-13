@@ -1,0 +1,16 @@
+{
+  "id": "12-two-launches-budget-exhausted",
+  "covers": ["D6", "D4"],
+  "seed": {},
+  "user_message": "Launch FALCON-01 to Farzone1 (500 km) and FALCON-02 to Farzone2 (200 km).",
+  "completion": "{\"message\": \"Launching FALCON-01 to Farzone1 and FALCON-02 to Farzone2.\", \"missions\": [{\"drone_id\": \"FALCON-01\", \"action\": \"launch\", \"zone\": \"Farzone1\", \"distance_km\": 500.0}, {\"drone_id\": \"FALCON-02\", \"action\": \"launch\", \"zone\": \"Farzone2\", \"distance_km\": 200.0}], \"roster_changes\": []}",
+  "expect": {
+    "status": 200,
+    "missions": [{"drone_id": "FALCON-01", "action": "launch"}],
+    "roster_changes": [],
+    "error_contains": [["FALCON-02", "insufficient_budget"]],
+    "mission_row_delta": 1,
+    "budget_delta_kwh": -400.0,
+    "chat_row_delta": 2
+  }
+}

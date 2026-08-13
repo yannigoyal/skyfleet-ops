@@ -15,6 +15,8 @@ sees what went wrong.
 
 from __future__ import annotations
 
+import logging
+import time
 from typing import Annotated
 
 from fastapi import APIRouter, HTTPException
@@ -27,11 +29,12 @@ from app.roster import service as roster_service
 from app.roster.models import RosterError
 from app.telemetry import TelemetryCache, TelemetrySource
 
-from . import repository
+from . import llm, repository
 from .context import build_fleet_context
 from .llm import LLMError, MissionAction, RosterChange, generate_reply
 
 HISTORY_LIMIT = 20
+logger = logging.getLogger(__name__)
 
 
 class ChatRequest(BaseModel):
@@ -82,6 +85,13 @@ async def _execute_roster_change(
     return {"drone_id": change.drone_id, "action": change.action}, None
 
 
+def _extract_reason(error_message: str) -> str:
+    """Pull the trailing service `reason` key off a formatted error string
+    (see _execute_mission/_execute_roster_change above), e.g.
+    "...: unknown_drone." -> "unknown_drone"."""
+    return error_message.rsplit(": ", 1)[-1].rstrip(".")
+
+
 def create_chat_router(
     db: Database, cache: TelemetryCache, source: TelemetrySource | None = None
 ) -> APIRouter:
@@ -93,12 +103,14 @@ def create_chat_router(
         fleet_context = await build_fleet_context(db, cache)
         history = await repository.get_recent_messages(db, limit=HISTORY_LIMIT)
 
+        start_time = time.monotonic()
         try:
             reply = await generate_reply(fleet_context, history, request.message)
         except LLMError as exc:
             raise HTTPException(
                 status_code=502, detail={"reason": exc.reason, "detail": str(exc)}
             ) from exc
+        elapsed_ms = (time.monotonic() - start_time) * 1000
 
         # Both loops execute strictly sequentially — one await per action
         # against live state, never a pre-validated batch — so a later
@@ -128,6 +140,24 @@ def create_chat_router(
             "assistant",
             reply.message,
             actions={"missions": executed_missions, "roster_changes": executed_roster},
+        )
+
+        # Token counts require the provider's usage object; plan 02 left
+        # generate_reply returning only the parsed reply, so both are
+        # recorded as None here rather than widening that signature in this
+        # plan. Never include the api key, request headers, the message
+        # text, or provider call arguments in this or any other log line.
+        reason_keys = [_extract_reason(error) for error in mission_errors + roster_errors]
+        logger.info(
+            "chat turn: elapsed_ms=%.1f prompt_tokens=%s completion_tokens=%s "
+            "executed=%d failed=%d reasons=%s mock_mode=%s",
+            elapsed_ms,
+            None,
+            None,
+            len(executed_missions) + len(executed_roster),
+            len(mission_errors) + len(roster_errors),
+            reason_keys,
+            llm.mock_mode_enabled(),
         )
 
         return {

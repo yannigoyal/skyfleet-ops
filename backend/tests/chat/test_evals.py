@@ -16,6 +16,8 @@ vague end-to-end assertion.
 from __future__ import annotations
 
 import json
+import logging
+import re
 from pathlib import Path
 
 import pytest
@@ -180,3 +182,125 @@ async def test_no_action_is_silently_dropped(fixture_path, db, cache, mock_mode,
     body = response.json()
     executed_count = len(body["missions"]) + len(body["roster_changes"])
     assert executed_count + len(body["errors"]) == proposed_count
+
+
+DRONE_ID_PATTERN = re.compile(r"[A-Z]+-\d+")
+
+
+class TestTransparency:
+    """AI-SPEC D5: every executed action's drone id is named verbatim in the
+    reply message, and a drone whose action was rejected is never described
+    as if it succeeded."""
+
+    @pytest.mark.parametrize("fixture_path", FIXTURES, ids=FIXTURE_IDS)
+    async def test_executed_and_failed_drones_named_correctly(
+        self, fixture_path, db, cache, mock_mode, stub_completion, monkeypatch
+    ):
+        fixture = _load_fixture(fixture_path)
+        if fixture["expect"]["status"] != 200:
+            pytest.skip(f"{fixture_path.stem}: malformed completion never reaches a reply message")
+            return
+
+        client = _setup_scenario(db, cache, fixture, stub_completion, monkeypatch)
+        response = client.post("/api/chat", json={"message": fixture["user_message"]})
+        assert response.status_code == 200
+        body = response.json()
+        message = body["message"]
+
+        for mission in body["missions"]:
+            assert mission["drone_id"] in message
+        for change in body["roster_changes"]:
+            assert change["drone_id"] in message
+
+        # Inverse: a drone id named in the message whose action was rejected
+        # must also be named in an error string -- it must never read as a
+        # silent success.
+        failed_drone_ids = {
+            match.group(0)
+            for error_text in body["errors"]
+            for match in [DRONE_ID_PATTERN.search(error_text)]
+            if match
+        }
+        for drone_id in failed_drone_ids:
+            if drone_id in message:
+                assert any(drone_id in error_text for error_text in body["errors"]), (
+                    f"{drone_id} appears in the message but not in any error string -- "
+                    "a rejected action must never read as a silent success"
+                )
+
+
+class TestSecretHygiene:
+    """T-02-18: OPENROUTER_API_KEY must reach neither a log record nor a response body."""
+
+    async def test_api_key_never_logged_or_returned(
+        self, db, cache, mock_mode, stub_completion, monkeypatch, caplog
+    ):
+        sentinel = "sk-sentinel-do-not-leak-4f8a9c"
+        monkeypatch.setattr(llm, "mock_mode_enabled", lambda: False)
+        monkeypatch.setenv("OPENROUTER_API_KEY", sentinel)
+        stub_completion(json.dumps({"message": "Fleet nominal.", "missions": [], "roster_changes": []}))
+        _seed_fleet_telemetry(cache)
+        client = _client(db, cache)
+
+        with caplog.at_level(logging.DEBUG):
+            response = client.post("/api/chat", json={"message": "status check"})
+
+        assert response.status_code == 200
+        assert sentinel not in caplog.text
+        assert sentinel not in json.dumps(response.json())
+
+
+class TestTurnLogging:
+    """AI-SPEC section 7: exactly one structured INFO record per completed
+    chat turn, carrying the executed/failed counts and the mock-mode flag,
+    and never the api-key sentinel."""
+
+    async def test_one_record_per_turn_carries_counts_and_mock_mode(
+        self, db, cache, mock_mode, stub_completion, monkeypatch, caplog
+    ):
+        sentinel = "sk-sentinel-do-not-leak-4f8a9c"
+        monkeypatch.setattr(llm, "mock_mode_enabled", lambda: False)
+        monkeypatch.setenv("OPENROUTER_API_KEY", sentinel)
+        _seed_fleet_telemetry(cache)
+        client = _client(db, cache)
+
+        stub_completion(json.dumps({"message": "Fleet nominal.", "missions": [], "roster_changes": []}))
+        with caplog.at_level(logging.INFO, logger="app.chat.router"):
+            response = client.post("/api/chat", json={"message": "status check"})
+        assert response.status_code == 200
+        turn_records = [record for record in caplog.records if record.name == "app.chat.router"]
+        assert len(turn_records) == 1
+        record_text = turn_records[0].getMessage()
+        assert "executed=0" in record_text
+        assert "failed=0" in record_text
+        assert "mock_mode=False" in record_text
+        assert sentinel not in record_text
+
+        caplog.clear()
+
+        stub_completion(
+            json.dumps(
+                {
+                    "message": "Launching FALCON-77.",
+                    "missions": [
+                        {
+                            "drone_id": "FALCON-77",
+                            "action": "launch",
+                            "zone": "Nowhere",
+                            "distance_km": 1.0,
+                        }
+                    ],
+                    "roster_changes": [],
+                }
+            )
+        )
+        with caplog.at_level(logging.INFO, logger="app.chat.router"):
+            response = client.post("/api/chat", json={"message": "launch FALCON-77"})
+        assert response.status_code == 200
+        turn_records = [record for record in caplog.records if record.name == "app.chat.router"]
+        assert len(turn_records) == 1
+        record_text = turn_records[0].getMessage()
+        assert "executed=0" in record_text
+        assert "failed=1" in record_text
+        assert "unknown_drone" in record_text
+        assert sentinel not in record_text
