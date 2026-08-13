@@ -5,12 +5,12 @@ milestone_name: milestone
 current_phase: 4
 current_phase_name: Docker Packaging & Test Suites
 status: planning
-stopped_at: Phase 3 UI-SPEC approved
-last_updated: "2026-08-13T18:03:33.195Z"
+stopped_at: Phase 3 complete, ready to plan Phase 4
+last_updated: "2026-08-13T22:45:00.000Z"
 last_activity: 2026-08-13
-last_activity_desc: Phase 02 (AI Flight Director Chat) complete — verified and closed
+last_activity_desc: Phase 03 (Frontend Buildout) complete — verified, secured, and closed
 progress:
-  total_phases: 3
+  total_phases: 4
   completed_phases: 3
   total_plans: 14
   completed_plans: 14
@@ -20,10 +20,10 @@ progress:
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-08-12)
+See: .planning/PROJECT.md (updated 2026-08-13)
 
 **Core value:** The dispatcher can watch a fleet of drones stream live telemetry, launch/recall missions against an energy budget, and delegate that same dispatching to an AI flight director through natural-language chat — all in one ATC-style console, single Docker command to run.
-**Current focus:** Phase 03 — frontend-buildout
+**Current focus:** Phase 04 — docker-packaging-&-test-suites
 
 ## Current Position
 
@@ -32,7 +32,7 @@ Plan: Not started
 Status: Ready to plan
 Last activity: 2026-08-13 — Phase 3 complete, transitioned to Phase 4
 
-Progress: [█████░░░░░] 50% (2 of 4 phases complete)
+Progress: [████████░░] 75% (3 of 4 phases complete)
 
 ## Performance Metrics
 
@@ -79,6 +79,10 @@ Recent decisions affecting current work:
 - [Phase 2]: CHAT-08 fix confirmed working end to end: real litellm.acompletion call with response_format/provider nested in extra_body, verified against live OpenRouter/Cerebras endpoint (3/3 prompts passed, bare JSON, under 5s each)
 - [Phase 2]: Fourteen-scenario offline reference dataset (backend/tests/chat/fixtures/) is the phase's CI gate — replays canned completions through the real endpoint, no network, no judge model; new fixtures added only from real observed failures, never speculative coverage
 - [Phase 2]: Post-merge code review caught a real data-integrity bug (NaN distance_km from the LLM bypassing every guard and permanently corrupting the energy budget via the append-only mission_log) — fixed at both the Pydantic and router precondition layers, pinned by fixture 15. All 7 review findings (1 critical, 4 warning, 2 info) fixed before phase closeout; see 02-REVIEW.md and 02-VERIFICATION.md
+- [Phase 3]: Built as 6 strictly sequential waves (tracer slice 03-02 first, then feature slices), one plan per wave — every plan after 03-01 shares `page.tsx` and/or `FleetOpsProvider`, so parallel execution was never viable. All 6 merged clean.
+- [Phase 3]: Code review found a real crash bug — `FleetOpsProvider.refetch()` had no error handling, so a transient backend 500 wrote `undefined` into typed state and crashed the console via `.toFixed()` on `undefined`. Fixed directly by the orchestrator (session hit a usage quota mid-review) along with 4 warnings; re-verified clean by the phase verifier. See 03-REVIEW.md, 03-VERIFICATION.md.
+- [Phase 3]: 81/81 frontend tests (Vitest + Testing Library), 300/300 backend tests unaffected (regression gate), 11/11 UAT items passed including 3 judgment-tier prohibitions (delivered-status wording, heatmap colour-blind safety, AI success-card accuracy). 29/29 security threats closed (21 mitigated + verified, 8 accepted risks) — see 03-SECURITY.md.
+- [Phase 3]: Flagged unresolved — phase is tagged `mode: mvp` in ROADMAP.md but its goal isn't authored as a User Story, so MVP-mode verification format couldn't apply. Recommend `/gsd mvp-phase 3` or clearing the flag before this pattern repeats in Phase 4.
 
 ### Pending Todos
 
@@ -101,6 +105,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-08-13T06:09:44.915Z
-Stopped at: Phase 3 UI-SPEC approved
-Resume file: .planning/phases/03-frontend-buildout/03-UI-SPEC.md
+Last session: 2026-08-13T22:45:00Z
+Stopped at: Phase 3 complete (execution, code review, UAT, security), ready to plan Phase 4
+Resume file: None
