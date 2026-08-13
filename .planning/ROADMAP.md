@@ -105,8 +105,36 @@ Plans:
   4. Header shows live remaining energy budget, connection status, and active mission count
   5. The AI flight-director chat panel supports message input, scrolling conversation history, a loading indicator, and inline structured confirmation cards for AI-executed actions
 
-**Plans**: TBD
+**Plans:** 6 plans
 **UI hint**: yes
+
+Plans:
+**Wave 1**
+
+- [ ] 03-01-PLAN.md — Wave 0 validation harness (Vitest + jsdom + `@/` alias) behind a blocking package-legitimacy gate for the three undeclared dev packages
+
+**Wave 2** *(blocked on Wave 1)*
+
+- [ ] 03-02-PLAN.md — Tracer: launch a mission and watch the budget drop — `types/fleet.ts` + `FleetOpsProvider` (poll, accumulate, refetch — D-01/D-02/D-04) + `DispatchBar` launch (D-14/D-15) + live `Header` (FE-07)
+
+**Wave 3** *(blocked on Wave 2)*
+
+- [ ] 03-03-PLAN.md — Recall plus the full inline backend-error matrix (FE-06, D-14), and the missions table over the accumulated history with the backend's `eta_minutes` (FE-05, supersedes D-13)
+
+**Wave 4** *(blocked on Wave 3)*
+
+- [ ] 03-04-PLAN.md — Capped altitude/speed history (D-03), roster battery sparklines (FE-01), and the drone detail panel (FE-02, D-16)
+
+**Wave 5** *(blocked on Wave 4)*
+
+- [ ] 03-05-PLAN.md — Recharts Treemap fleet heatmap (FE-03, D-09/D-10/D-11/D-12) and the energy-budget line chart (FE-04)
+
+**Wave 6** *(blocked on Wave 5)*
+
+- [ ] 03-06-PLAN.md — AI flight-director sidebar: `useChat` with the shared refetch (D-07/D-08), inline confirmation cards (FE-09, D-06), collapsible docked panel (FE-08, D-05)
+
+*Waves are strictly sequential: this is a single-page console, so every plan mounts its
+panels into `frontend/src/app/page.tsx` and no two plans can own that file in the same wave.*
 
 ### Phase 4: Docker Packaging & Test Suites
 
@@ -133,5 +161,5 @@ Phases execute in numeric order: 1 → 2 → 3 → 4
 |-------|----------------|--------|-----------|
 | 1. Roster Module | 4/4 | Complete    | 2026-08-12 |
 | 2. AI Flight Director Chat | 4/4 | Complete    | 2026-08-13 |
-| 3. Frontend Buildout | 0/TBD | Not started | - |
+| 3. Frontend Buildout | 0/6 | Not started | - |
 | 4. Docker Packaging & Test Suites | 0/TBD | Not started | - |
