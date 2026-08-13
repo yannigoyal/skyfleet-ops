@@ -105,13 +105,13 @@ Plans:
   4. Header shows live remaining energy budget, connection status, and active mission count
   5. The AI flight-director chat panel supports message input, scrolling conversation history, a loading indicator, and inline structured confirmation cards for AI-executed actions
 
-**Plans:** 6 plans
+**Plans:** 1/6 plans executed
 **UI hint**: yes
 
 Plans:
 **Wave 1**
 
-- [ ] 03-01-PLAN.md — Wave 0 validation harness (Vitest + jsdom + `@/` alias) behind a blocking package-legitimacy gate for the three undeclared dev packages
+- [x] 03-01-PLAN.md — Wave 0 validation harness (Vitest + jsdom + `@/` alias) behind a blocking package-legitimacy gate for the three undeclared dev packages
 
 **Wave 2** *(blocked on Wave 1)*
 
@@ -161,5 +161,5 @@ Phases execute in numeric order: 1 → 2 → 3 → 4
 |-------|----------------|--------|-----------|
 | 1. Roster Module | 4/4 | Complete    | 2026-08-12 |
 | 2. AI Flight Director Chat | 4/4 | Complete    | 2026-08-13 |
-| 3. Frontend Buildout | 0/6 | Not started | - |
+| 3. Frontend Buildout | 1/6 | In Progress|  |
 | 4. Docker Packaging & Test Suites | 0/TBD | Not started | - |
