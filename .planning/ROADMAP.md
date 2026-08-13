@@ -105,7 +105,7 @@ Plans:
   4. Header shows live remaining energy budget, connection status, and active mission count
   5. The AI flight-director chat panel supports message input, scrolling conversation history, a loading indicator, and inline structured confirmation cards for AI-executed actions
 
-**Plans:** 1/6 plans executed
+**Plans:** 2/6 plans executed
 **UI hint**: yes
 
 Plans:
@@ -115,7 +115,7 @@ Plans:
 
 **Wave 2** *(blocked on Wave 1)*
 
-- [ ] 03-02-PLAN.md — Tracer: launch a mission and watch the budget drop — `types/fleet.ts` + `FleetOpsProvider` (poll, accumulate, refetch — D-01/D-02/D-04) + `DispatchBar` launch (D-14/D-15) + live `Header` (FE-07)
+- [x] 03-02-PLAN.md — Tracer: launch a mission and watch the budget drop — `types/fleet.ts` + `FleetOpsProvider` (poll, accumulate, refetch — D-01/D-02/D-04) + `DispatchBar` launch (D-14/D-15) + live `Header` (FE-07)
 
 **Wave 3** *(blocked on Wave 2)*
 
@@ -161,5 +161,5 @@ Phases execute in numeric order: 1 → 2 → 3 → 4
 |-------|----------------|--------|-----------|
 | 1. Roster Module | 4/4 | Complete    | 2026-08-12 |
 | 2. AI Flight Director Chat | 4/4 | Complete    | 2026-08-13 |
-| 3. Frontend Buildout | 1/6 | In Progress|  |
+| 3. Frontend Buildout | 2/6 | In Progress|  |
 | 4. Docker Packaging & Test Suites | 0/TBD | Not started | - |
