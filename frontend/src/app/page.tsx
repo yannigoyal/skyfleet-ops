@@ -5,6 +5,8 @@ import { FleetRosterPanel } from "@/components/FleetRosterPanel";
 import { DetailPanel } from "@/components/DetailPanel";
 import { DispatchBar } from "@/components/DispatchBar";
 import { MissionsTable } from "@/components/MissionsTable";
+import { FleetHeatmap } from "@/components/FleetHeatmap";
+import { EnergyBudgetChart } from "@/components/EnergyBudgetChart";
 import { useTelemetryStream } from "@/lib/useTelemetryStream";
 import { FleetOpsProvider, useFleetOps } from "@/lib/FleetOpsProvider";
 
@@ -39,6 +41,8 @@ function Console() {
             altitudeHistory={altitudeHistory}
             speedHistory={speedHistory}
           />
+          <FleetHeatmap snapshot={snapshot} />
+          <EnergyBudgetChart />
           <MissionsTable />
         </div>
         <aside className="rounded-lg border border-ops-border bg-ops-panel p-4 text-sm text-slate-400">

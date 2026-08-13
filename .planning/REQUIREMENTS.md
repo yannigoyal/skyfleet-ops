@@ -29,8 +29,8 @@ Requirements for this milestone (the entire remaining scope of PLAN.md). Databas
 
 - [x] **FE-01**: Per-drone sparkline mini-chart renders next to each roster row, built from the battery history already accumulated by `useTelemetryStream`
 - [x] **FE-02**: Clicking a drone in the roster opens a detail panel showing battery, altitude, speed, and current mission over time
-- [ ] **FE-03**: Fleet heatmap (treemap) renders with rectangles sized by mission energy cost and colored by battery health (green = healthy, red = critical)
-- [ ] **FE-04**: Energy-budget line chart shows remaining kWh over time, sourced from `GET /api/fleet/history`
+- [x] **FE-03**: Fleet heatmap (treemap) renders with rectangles sized by mission energy cost and colored by battery health (green = healthy, red = critical)
+- [x] **FE-04**: Energy-budget line chart shows remaining kWh over time, sourced from `GET /api/fleet/history`
 
 ### Frontend — Dispatch & Missions
 
@@ -97,8 +97,8 @@ Deferred — not part of this milestone.
 | CHAT-08 | Phase 2 | Complete |
 | FE-01 | Phase 3 | Complete |
 | FE-02 | Phase 3 | Complete |
-| FE-03 | Phase 3 | Pending |
-| FE-04 | Phase 3 | Pending |
+| FE-03 | Phase 3 | Complete |
+| FE-04 | Phase 3 | Complete |
 | FE-05 | Phase 3 | Pending |
 | FE-06 | Phase 3 | Complete |
 | FE-07 | Phase 3 | Complete |
