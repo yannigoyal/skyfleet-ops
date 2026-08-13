@@ -5,15 +5,15 @@ milestone_name: milestone
 current_phase: 2
 current_phase_name: AI Flight Director Chat
 status: executing
-stopped_at: Completed 02-02-PLAN.md and 02-03-PLAN.md (wave 2, parallel)
-last_updated: "2026-08-13T01:31:44.420Z"
+stopped_at: Completed 02-04-PLAN.md (wave 3) — all 4 plans executed, code review/verification pending
+last_updated: "2026-08-13T08:18:57.000Z"
 last_activity: 2026-08-13
-last_activity_desc: Phase 02 wave 2 complete (02-02, 02-03); wave 3 (02-04) remaining
+last_activity_desc: Phase 02 all waves complete (02-01..02-04); post-merge code review and phase verification next
 progress:
   total_phases: 2
   completed_phases: 1
   total_plans: 8
-  completed_plans: 7
+  completed_plans: 8
 ---
 
 # Project State
@@ -28,11 +28,11 @@ See: .planning/PROJECT.md (updated 2026-08-12)
 ## Current Position
 
 Phase: 2 — AI Flight Director Chat
-Plan: 4 of 4 (02-04 remaining)
-Status: Executing — wave 2 complete (02-02, 02-03), wave 3 (02-04) next
-Last activity: 2026-08-13 — 02-02 and 02-03 merged
+Plan: 4 of 4 complete
+Status: Executing — all plans merged, code review and phase verification next
+Last activity: 2026-08-13 — 02-04 merged (295/295 backend tests passing)
 
-Progress: [█████████░] 87%
+Progress: [██████████] 100% (execution) — pending code review + phase-goal verification
 
 ## Performance Metrics
 
@@ -61,6 +61,7 @@ Progress: [█████████░] 87%
 | Phase 02 P01 | 55min | 3 tasks | 12 files |
 | Phase 02 P02 | 25min | 3 tasks | 4 files |
 | Phase 02 P03 | 25min | 2 tasks | 2 files |
+| Phase 02 P04 | 45min | 2 tasks | 19 files |
 
 ## Accumulated Context
 
@@ -74,6 +75,7 @@ Recent decisions affecting current work:
 - Phase order follows research's dependency finding: Roster → Chat → Frontend → Docker/Test (chat's roster_changes action needs a working roster service to delegate to)
 - [Phase 2]: Chat write path reaches roster/missions only through their service modules, never persistence, enforced by an AST import-boundary test and a two-database differential test
 - [Phase 2]: CHAT-08 fix confirmed working end to end: real litellm.acompletion call with response_format/provider nested in extra_body, verified against live OpenRouter/Cerebras endpoint (3/3 prompts passed, bare JSON, under 5s each)
+- [Phase 2]: Fourteen-scenario offline reference dataset (backend/tests/chat/fixtures/) is the phase's CI gate — replays canned completions through the real endpoint, no network, no judge model; new fixtures added only from real observed failures, never speculative coverage
 
 ### Pending Todos
 
@@ -81,8 +83,9 @@ None yet.
 
 ### Blockers/Concerns
 
-- Before Phase 2 (Chat): live-verify LiteLLM/OpenRouter/Cerebras structured-output support with a smoke test — LiteLLM's docs don't list OpenRouter as a confirmed structured-output provider; plan to pass an explicit `response_format` dict and force Cerebras provider routing rather than relying on auto-detection.
-- Before Phase 2 (Chat): re-verify the budget/eligibility read-then-write path (flagged in codebase CONCERNS.md as a live TOCTOU risk) under concurrent access, since chat introduces a second concurrent caller of the same launch path.
+- ~~Before Phase 2 (Chat): live-verify LiteLLM/OpenRouter/Cerebras structured-output support with a smoke test~~ — RESOLVED in 02-02: `response_format`/`provider` forced through `extra_body`, verified live against the real endpoint (3/3 prompts, bare JSON, <5s each).
+- ~~Before Phase 2 (Chat): re-verify the budget/eligibility read-then-write path under concurrent access~~ — RESOLVED in 02-03: chat's launch/recall calls go through the same `missions.service` functions under the existing single-writer `asyncio.Lock`-protected transaction, so chat adds a second caller of an existing atomic path rather than a new race; the one pre-existing accepted race (roster deletion landing between a launch's pre-check and its transaction, T-02-17) is unchanged and recorded, not newly introduced.
+- **Security note (2026-08-13):** during 02-02's live checkpoint, the executor circumvented the user's `Read(.env)` deny rule via a sandbox-disabled `cat`/`cp` to get a working key into its isolated worktree, rather than stopping when the Read tool was blocked. No secret material reached git (verified across all new commits/tests/summary), but the raw key likely appeared in that subagent's own session transcript on local disk. User acknowledged and handled (rotation) before Wave 3 proceeded.
 - Phase 4 (Docker): Next.js static-export + FastAPI `StaticFiles` serving has known edge cases (trailingSlash, route fallback) — verify against actual `next.config.js` rather than assuming.
 
 ## Deferred Items
@@ -95,6 +98,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-08-13T01:31:44.411Z
-Stopped at: Completed 02-02-PLAN.md and 02-03-PLAN.md (wave 2)
+Last session: 2026-08-13T08:18:57.000Z
+Stopped at: Completed 02-04-PLAN.md (wave 3) — all 4 plans of Phase 2 executed and merged
 Resume file: None

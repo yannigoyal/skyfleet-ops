@@ -75,7 +75,7 @@ Plans:
   4. Chat conversation history persists in `chat_messages`, and recent turns are loaded into the prompt context for follow-up messages
   5. With `LLM_MOCK=true` the backend returns deterministic responses without calling OpenRouter; invalid or failing AI-proposed actions (unknown drone id, insufficient budget, malformed JSON) surface as readable errors in the chat response rather than crashing; real calls use an explicit `response_format` schema forced to Cerebras provider routing rather than relying on auto-detection
 
-**Plans:** 3/4 plans executed
+**Plans:** 4/4 plans executed
 
 Plans:
 **Wave 1**
@@ -89,7 +89,7 @@ Plans:
 
 **Wave 3** *(blocked on Wave 2 completion)*
 
-- [ ] 02-04-PLAN.md — CHAT-07: fourteen-scenario reference dataset and replay harness, transparency and secret-hygiene gates, and the per-turn structured log line
+- [x] 02-04-PLAN.md — CHAT-07: fourteen-scenario reference dataset and replay harness, transparency and secret-hygiene gates, and the per-turn structured log line
 
 ### Phase 3: Frontend Buildout
 
