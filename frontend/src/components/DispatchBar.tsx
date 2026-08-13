@@ -3,38 +3,39 @@
 import { useState } from "react";
 import { useFleetOps } from "@/lib/FleetOpsProvider";
 
+interface DispatchError {
+  reason: string;
+  requested_kwh?: number;
+  remaining_kwh?: number;
+}
+
 /**
- * Manual mission launch form (FE-06). Renders a roster dropdown (D-15 — an
- * invalid drone id is impossible to type), a free-text zone field, and a
- * distance input. Submits directly to POST /api/fleet/missions and surfaces
- * the backend's reason-coded error verbatim (D-14) — no client-side
- * eligibility/budget/roster check is duplicated here.
+ * Manual mission launch and recall form (FE-06). Renders a roster dropdown
+ * (D-15 — an invalid drone id is impossible to type), a free-text zone
+ * field, a distance input, and Launch/Recall controls sharing the selected
+ * drone. Launch submits POST to the missions collection; Recall issues a
+ * DELETE against the selected drone's mission — the only path that ever
+ * puts a mission into `recalled` status (D-01). Both surface the backend's
+ * reason-coded error verbatim (D-14) — no client-side eligibility/budget/
+ * roster re-validation is duplicated here, and neither path shows a
+ * confirmation dialog (an explicitly ratified Out of Scope item).
  */
 export function DispatchBar() {
   const { roster, upsertMission, refetch } = useFleetOps();
   const [droneId, setDroneId] = useState("");
   const [zone, setZone] = useState("");
   const [distanceKm, setDistanceKm] = useState("");
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<DispatchError | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
-  async function handleSubmit(event: React.FormEvent) {
-    event.preventDefault();
+  async function submit(request: () => Promise<Response>) {
     setError(null);
     setSubmitting(true);
     try {
-      const res = await fetch("/api/fleet/missions", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          drone_id: droneId,
-          zone,
-          distance_km: Number(distanceKm),
-        }),
-      });
+      const res = await request();
       const body = await res.json();
       if (!res.ok) {
-        setError(body.detail?.reason ?? "dispatch_failed");
+        setError(body.detail ?? { reason: "dispatch_failed" });
         return;
       }
       upsertMission(body);
@@ -44,12 +45,32 @@ export function DispatchBar() {
     }
   }
 
+  async function handleLaunch(event: React.FormEvent) {
+    event.preventDefault();
+    await submit(() =>
+      fetch("/api/fleet/missions", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          drone_id: droneId,
+          zone,
+          distance_km: Number(distanceKm),
+        }),
+      }),
+    );
+  }
+
+  async function handleRecall() {
+    if (!droneId) return;
+    await submit(() => fetch(`/api/fleet/missions/${droneId}`, { method: "DELETE" }));
+  }
+
   return (
     <div className="rounded-lg border border-ops-border bg-ops-panel">
       <div className="border-b border-ops-border px-4 py-2 text-sm font-semibold text-slate-300">
         Dispatch
       </div>
-      <form onSubmit={handleSubmit} className="flex flex-wrap items-end gap-3 p-4">
+      <form onSubmit={handleLaunch} className="flex flex-wrap items-end gap-3 p-4">
         <label className="flex flex-col gap-1 text-xs text-slate-400">
           Drone
           <select
@@ -97,8 +118,27 @@ export function DispatchBar() {
         >
           Launch Mission
         </button>
+        <button
+          type="button"
+          onClick={handleRecall}
+          disabled={submitting || !droneId}
+          className="rounded border border-ops-border px-4 py-1.5 text-sm font-semibold text-slate-300 disabled:opacity-50"
+        >
+          Recall
+        </button>
       </form>
-      {error && <div className="px-4 pb-4 text-sm text-red-400">{error}</div>}
+      {error && (
+        <div className="px-4 pb-4 text-sm text-red-400">
+          {error.reason}
+          {error.requested_kwh !== undefined && error.remaining_kwh !== undefined && (
+            <>
+              {" "}
+              (requested {error.requested_kwh.toFixed(2)} kWh, remaining{" "}
+              {error.remaining_kwh.toFixed(2)} kWh)
+            </>
+          )}
+        </div>
+      )}
     </div>
   );
 }

@@ -3,6 +3,7 @@
 import { Header } from "@/components/Header";
 import { FleetRosterPanel } from "@/components/FleetRosterPanel";
 import { DispatchBar } from "@/components/DispatchBar";
+import { MissionsTable } from "@/components/MissionsTable";
 import { useTelemetryStream } from "@/lib/useTelemetryStream";
 import { FleetOpsProvider, useFleetOps } from "@/lib/FleetOpsProvider";
 
@@ -26,6 +27,7 @@ function Console() {
         <div className="flex flex-col gap-4 lg:col-span-2">
           <DispatchBar />
           <FleetRosterPanel snapshot={snapshot} selectedDroneId={selectedDroneId} onSelect={select} />
+          <MissionsTable />
         </div>
         <aside className="rounded-lg border border-ops-border bg-ops-panel p-4 text-sm text-slate-400">
           <div className="mb-2 font-semibold text-slate-300">AI Flight Director</div>
