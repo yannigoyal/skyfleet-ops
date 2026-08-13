@@ -139,7 +139,6 @@ panels into `frontend/src/app/page.tsx` and no two plans can own that file in th
 ### Phase 4: Docker Packaging & Test Suites
 
 **Goal**: Operator can launch the whole platform with a single command, and the remaining build (roster, chat, frontend, packaging) is verified by automated backend, frontend, and E2E test suites.
-**Mode:** mvp
 **Depends on**: Phase 1, Phase 2, Phase 3 (E2E scenarios need every API surface and the frontend finalized to be meaningful)
 **Requirements**: DEPLOY-01, DEPLOY-02, DEPLOY-03, DEPLOY-04, TEST-01, TEST-02, TEST-03, TEST-04, TEST-05
 **Success Criteria** (what must be TRUE):
@@ -150,7 +149,21 @@ panels into `frontend/src/app/page.tsx` and no two plans can own that file in th
   4. Backend and frontend unit test suites pass, covering roster service/repository/router logic, chat/LLM structured-output parsing and validation delegation, and the new frontend components
   5. A Playwright E2E suite, isolated via `tests/docker-compose.test.yml` and run with `LLM_MOCK=true`, passes covering fresh start, roster add/remove, mission launch/recall with budget updates, visualization rendering, mocked AI chat, and SSE disconnect/reconnect resilience
 
-**Plans**: TBD
+**Plans:** 4 plans
+
+Plans:
+**Wave 1**
+
+- [ ] 04-01-PLAN.md — Tracer: bind-mount Docker packaging proven through build, serve, and restart; build-context hygiene; Windows script parity
+- [ ] 04-02-PLAN.md — Audit the existing pytest and Vitest suites against TEST-01/02/03's exact wording, gap-fill only where uncovered
+
+**Wave 2** *(blocked on Wave 1 completion)*
+
+- [ ] 04-03-PLAN.md — Serialize the E2E harness, add shared helpers, and cover TEST-04 scenarios 1-3 (fresh start, roster add/remove, launch/recall) plus TEST-05 browser isolation
+
+**Wave 3** *(blocked on Wave 2 completion)*
+
+- [ ] 04-04-PLAN.md — Cover TEST-04 scenarios 4-6 (visualization rendering, mocked AI chat, SSE disconnect/reconnect) and correct the suite README
 
 ## Progress
 
