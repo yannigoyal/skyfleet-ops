@@ -39,7 +39,9 @@ logger = logging.getLogger(__name__)
 
 
 class ChatRequest(BaseModel):
-    message: Annotated[str, StringConstraints(strip_whitespace=True, min_length=1)]
+    message: Annotated[
+        str, StringConstraints(strip_whitespace=True, min_length=1, max_length=4000)
+    ]
 
 
 async def _execute_mission(

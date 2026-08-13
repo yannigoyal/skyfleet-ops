@@ -345,6 +345,12 @@ class TestMessageValidation:
         assert response.status_code == 422
         assert await db.fetchall("SELECT * FROM chat_messages", ()) == []
 
+    async def test_over_max_length_returns_422_and_writes_nothing(self, db, cache, mock_mode):
+        client = _client(db, cache)
+        response = client.post("/api/chat", json={"message": "a" * 4001})
+        assert response.status_code == 422
+        assert await db.fetchall("SELECT * FROM chat_messages", ()) == []
+
     async def test_multibyte_message_round_trips(self, db, cache, mock_mode):
         _seed_fleet_telemetry(cache)
         client = _client(db, cache)
