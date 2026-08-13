@@ -105,7 +105,7 @@ Plans:
   4. Header shows live remaining energy budget, connection status, and active mission count
   5. The AI flight-director chat panel supports message input, scrolling conversation history, a loading indicator, and inline structured confirmation cards for AI-executed actions
 
-**Plans:** 5/6 plans executed
+**Plans:** 6/6 plans executed
 **UI hint**: yes
 
 Plans:
@@ -131,7 +131,7 @@ Plans:
 
 **Wave 6** *(blocked on Wave 5)*
 
-- [ ] 03-06-PLAN.md — AI flight-director sidebar: `useChat` with the shared refetch (D-07/D-08), inline confirmation cards (FE-09, D-06), collapsible docked panel (FE-08, D-05)
+- [x] 03-06-PLAN.md — AI flight-director sidebar: `useChat` with the shared refetch (D-07/D-08), inline confirmation cards (FE-09, D-06), collapsible docked panel (FE-08, D-05)
 
 *Waves are strictly sequential: this is a single-page console, so every plan mounts its
 panels into `frontend/src/app/page.tsx` and no two plans can own that file in the same wave.*
@@ -161,5 +161,5 @@ Phases execute in numeric order: 1 → 2 → 3 → 4
 |-------|----------------|--------|-----------|
 | 1. Roster Module | 4/4 | Complete    | 2026-08-12 |
 | 2. AI Flight Director Chat | 4/4 | Complete    | 2026-08-13 |
-| 3. Frontend Buildout | 5/6 | In Progress|  |
+| 3. Frontend Buildout | 6/6 | In Progress|  |
 | 4. Docker Packaging & Test Suites | 0/TBD | Not started | - |
