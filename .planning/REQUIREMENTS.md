@@ -18,8 +18,8 @@ Requirements for this milestone (the entire remaining scope of PLAN.md). Databas
 
 - [x] **CHAT-01**: Operator can send a chat message via `POST /api/chat` and receive a complete structured JSON response (message + executed actions)
 - [x] **CHAT-02**: AI flight director can launch missions on the operator's behalf through structured output, validated through the identical service-layer function manual dispatch uses (no separate "trusted" write path)
-- [ ] **CHAT-03**: AI flight director can recall missions on the operator's behalf through structured output, validated the same way
-- [ ] **CHAT-04**: AI flight director can add/remove roster drones through structured output, validated the same way
+- [x] **CHAT-03**: AI flight director can recall missions on the operator's behalf through structured output, validated the same way
+- [x] **CHAT-04**: AI flight director can add/remove roster drones through structured output, validated the same way
 - [x] **CHAT-05**: Chat conversation history persists in `chat_messages` and recent history is loaded into the prompt context for follow-up messages
 - [ ] **CHAT-06**: When `LLM_MOCK=true`, the backend returns deterministic mock responses instead of calling OpenRouter
 - [ ] **CHAT-07**: When an LLM-issued mission/roster action fails validation (e.g., insufficient budget), the error is included in the chat response so the LLM can inform the operator
@@ -89,8 +89,8 @@ Deferred — not part of this milestone.
 | ROST-04 | Phase 1 | Complete |
 | CHAT-01 | Phase 2 | Complete |
 | CHAT-02 | Phase 2 | Complete |
-| CHAT-03 | Phase 2 | Pending |
-| CHAT-04 | Phase 2 | Pending |
+| CHAT-03 | Phase 2 | Complete |
+| CHAT-04 | Phase 2 | Complete |
 | CHAT-05 | Phase 2 | Complete |
 | CHAT-06 | Phase 2 | Pending |
 | CHAT-07 | Phase 2 | Pending |
