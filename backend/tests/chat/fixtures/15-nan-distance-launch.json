@@ -1,0 +1,16 @@
+{
+  "id": "15-nan-distance-launch",
+  "covers": ["D2", "D4", "G3"],
+  "seed": {},
+  "user_message": "Launch FALCON-03 to Riverside.",
+  "completion": "{\"message\": \"Launching FALCON-03 to Riverside.\", \"missions\": [{\"drone_id\": \"FALCON-03\", \"action\": \"launch\", \"zone\": \"Riverside\", \"distance_km\": NaN}], \"roster_changes\": []}",
+  "expect": {
+    "status": 502,
+    "missions": [],
+    "roster_changes": [],
+    "error_contains": [],
+    "mission_row_delta": 0,
+    "budget_delta_kwh": 0,
+    "chat_row_delta": 0
+  }
+}

@@ -16,6 +16,7 @@ sees what went wrong.
 from __future__ import annotations
 
 import logging
+import math
 import time
 from typing import Annotated
 
@@ -51,7 +52,12 @@ async def _execute_mission(
             return None, f"Could not recall {action.drone_id}: {exc.reason}."
         return {"drone_id": action.drone_id, "action": "recall"}, None
 
-    if not action.zone or action.distance_km is None or action.distance_km <= 0:
+    if (
+        not action.zone
+        or action.distance_km is None
+        or not math.isfinite(action.distance_km)
+        or action.distance_km <= 0
+    ):
         return None, f"Could not launch {action.drone_id}: missing zone or distance."
 
     try:

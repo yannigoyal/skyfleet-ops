@@ -1,6 +1,6 @@
 # Chat reference-dataset fixtures
 
-Fourteen JSON files, each one canned "completion" the flight-director LLM could have returned,
+Fifteen JSON files, each one canned "completion" the flight-director LLM could have returned,
 replayed offline through the real `/api/chat` endpoint by `tests/chat/test_evals.py`. This is the
 phase's CI gate: no network call, no judge model, deterministic assertions over executed actions,
 refused actions, error text, and resulting database state.
@@ -74,7 +74,7 @@ entry naming the requirement or dimension it now pins.
     `SELECT COUNT(*) FROM missions WHERE status = 'en_route'` after the request. Same purpose as
     `final_mission_status`.
 
-## The fourteen scenarios
+## The fifteen scenarios
 
 | # | File | Covers |
 |---|------|--------|
@@ -92,3 +92,4 @@ entry naming the requirement or dimension it now pins.
 | 12 | `12-two-launches-budget-exhausted.json` | D6, D4 |
 | 13 | `13-contradictory-launch-and-recall.json` | D6 |
 | 14 | `14-injection-style-message.json` | D8 |
+| 15 | `15-nan-distance-launch.json` | D2, D4, G3 |
