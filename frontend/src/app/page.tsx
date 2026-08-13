@@ -7,12 +7,14 @@ import { DispatchBar } from "@/components/DispatchBar";
 import { MissionsTable } from "@/components/MissionsTable";
 import { FleetHeatmap } from "@/components/FleetHeatmap";
 import { EnergyBudgetChart } from "@/components/EnergyBudgetChart";
+import { ChatPanel } from "@/components/chat/ChatPanel";
 import { useTelemetryStream } from "@/lib/useTelemetryStream";
 import { FleetOpsProvider, useFleetOps } from "@/lib/FleetOpsProvider";
 
-// Mission control, chat, and roster CRUD are specified in planning/PLAN.md
-// (sections 8-10). The dispatch bar and live fleet header are wired up
-// through FleetOpsProvider; chat remains a placeholder — see plan 06.
+// Mission control and roster CRUD are specified in planning/PLAN.md
+// (sections 8-10). The dispatch bar, live fleet header, and AI flight
+// director chat sidebar are all wired up through FleetOpsProvider — this is
+// the phase's final mount (plan 06).
 function Console() {
   const { snapshot, status, history, altitudeHistory, speedHistory } = useTelemetryStream();
   const { remainingKwh, energyBudgetKwh, activeMissionCount, selectedDroneId, select } =
@@ -45,10 +47,7 @@ function Console() {
           <EnergyBudgetChart />
           <MissionsTable />
         </div>
-        <aside className="rounded-lg border border-ops-border bg-ops-panel p-4 text-sm text-slate-400">
-          <div className="mb-2 font-semibold text-slate-300">AI Flight Director</div>
-          <p>Chat integration is specified in planning/PLAN.md section 9 — not yet implemented.</p>
-        </aside>
+        <ChatPanel />
       </main>
     </div>
   );

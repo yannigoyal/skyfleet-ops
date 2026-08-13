@@ -40,8 +40,8 @@ Requirements for this milestone (the entire remaining scope of PLAN.md). Databas
 
 ### Frontend — AI Chat Panel
 
-- [ ] **FE-08**: AI flight director chat panel (docked/collapsible sidebar) has a message input, scrolling conversation history, and a loading indicator while waiting for a response
-- [ ] **FE-09**: Mission launches and roster changes executed by the AI are shown inline in the chat transcript as structured confirmation cards (action, params, result) — not buried in prose
+- [x] **FE-08**: AI flight director chat panel (docked/collapsible sidebar) has a message input, scrolling conversation history, and a loading indicator while waiting for a response
+- [x] **FE-09**: Mission launches and roster changes executed by the AI are shown inline in the chat transcript as structured confirmation cards (action, params, result) — not buried in prose
 
 ### Deployment
 
@@ -102,8 +102,8 @@ Deferred — not part of this milestone.
 | FE-05 | Phase 3 | Pending |
 | FE-06 | Phase 3 | Complete |
 | FE-07 | Phase 3 | Complete |
-| FE-08 | Phase 3 | Pending |
-| FE-09 | Phase 3 | Pending |
+| FE-08 | Phase 3 | Complete |
+| FE-09 | Phase 3 | Complete |
 | DEPLOY-01 | Phase 4 | Pending |
 | DEPLOY-02 | Phase 4 | Pending |
 | DEPLOY-03 | Phase 4 | Pending |
