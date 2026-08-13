@@ -30,6 +30,9 @@ from app.roster import service as roster_service
 from app.roster.models import RosterError
 from app.telemetry import TelemetryCache, TelemetrySource
 
+# llm imported both ways: llm.mock_mode_enabled() below must see test
+# monkeypatches of the module attribute, which `from .llm import ...` alone
+# would not (it binds a name, not a live reference to the module attribute).
 from . import llm, repository
 from .context import build_fleet_context
 from .llm import LLMError, MissionAction, RosterChange, generate_reply
