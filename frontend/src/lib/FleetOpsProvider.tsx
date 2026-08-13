@@ -65,6 +65,14 @@ export function FleetOpsProvider({ children }: { children: ReactNode }) {
   const [roster, setRoster] = useState<RosterDrone[]>([]);
   const [selectedDroneId, setSelectedDroneId] = useState<string | null>(null);
   const [loaded, setLoaded] = useState(false);
+  // Monotonic counter guarding against out-of-order GET /api/fleet
+  // resolution (RESEARCH.md Pitfall 2): the interval poll and an
+  // action-triggered refetch can both be in flight at once, and network
+  // timing offers no guarantee the one issued first resolves first. Only
+  // the result of the most-recently-issued call is applied to state; an
+  // older call's response, however late it arrives, is discarded rather
+  // than rolling the budget/mission state backward.
+  const latestRequestIdRef = useRef(0);
 
   const upsertMission = useCallback((mission: Mission) => {
     missionsRef.current = new Map(missionsRef.current).set(mission.id, mission);
@@ -72,12 +80,15 @@ export function FleetOpsProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const refetch = useCallback(async () => {
+    const requestId = ++latestRequestIdRef.current;
     const [fleetRes, rosterRes] = await Promise.all([
       fetch("/api/fleet"),
       fetch("/api/roster"),
     ]);
     const fleetData: FleetStatus = await fleetRes.json();
     const rosterData: { drones: RosterDrone[] } = await rosterRes.json();
+
+    if (requestId !== latestRequestIdRef.current) return;
 
     setBudget({
       energyBudgetKwh: fleetData.energy_budget_kwh,
