@@ -130,20 +130,23 @@ describe("FleetHeatmap — treemap sized by mission energy, coloured by battery 
       ],
     });
 
+    // The mission upsert (Setup's effect) lands after the provider's own
+    // mount-triggered refetch resolves, one render tick after the initial
+    // idle-weighted layout — poll until the areas reflect the settled
+    // mission-weighted state rather than asserting on the first paint.
     await waitFor(() => {
-      expect(container.querySelectorAll("rect").length).toBe(2);
+      const rects = Array.from(container.querySelectorAll("rect"));
+      expect(rects.length).toBe(2);
+      const areas = rects.map((rect) => {
+        const width = Number(rect.getAttribute("width"));
+        const height = Number(rect.getAttribute("height"));
+        return width * height;
+      });
+      // The en_route drone's mission (8 kWh) must dominate the delivered
+      // drone's idle-floor weight (0.1 kWh) by a wide margin.
+      const [larger, smaller] = [Math.max(...areas), Math.min(...areas)];
+      expect(larger).toBeGreaterThan(smaller * 5);
     });
-
-    const rects = Array.from(container.querySelectorAll("rect"));
-    const areas = rects.map((rect) => {
-      const width = Number(rect.getAttribute("width"));
-      const height = Number(rect.getAttribute("height"));
-      return width * height;
-    });
-    // The en_route drone's mission (8 kWh) must dominate the delivered
-    // drone's idle-floor weight (0.1 kWh) by a wide margin.
-    const [larger, smaller] = [Math.max(...areas), Math.min(...areas)];
-    expect(larger).toBeGreaterThan(smaller * 5);
   });
 
   it("Test 3 (D-11, colour bands): 75% renders emerald, 35% renders amber, 8% renders red", async () => {
