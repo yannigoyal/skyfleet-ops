@@ -172,16 +172,50 @@ def mock_reply(fleet_context: dict, user_message: str) -> FlightDirectorReply:
     return FlightDirectorReply(message=summary)
 
 
+def _extra_body() -> dict:
+    """The JSON schema and Cerebras routing hint, nested for the OpenRouter call.
+
+    LiteLLM's OpenRouter adapter gates a top-level `response_format` kwarg on a
+    provider allowlist that excludes OpenRouter, silently dropping it (see
+    02-RESEARCH.md Pitfall 5 / CHAT-08). Nesting both here inside `extra_body`
+    is the documented no-fork workaround, and having exactly one definition
+    site keeps the shape from drifting between the call and its regression test.
+    """
+    return {
+        "response_format": {"type": "json_schema", "json_schema": RESPONSE_SCHEMA},
+        "provider": PROVIDER_ROUTING,
+    }
+
+
 async def generate_reply(
     fleet_context: dict, history: list[ChatMessage], user_message: str
 ) -> FlightDirectorReply:
     """Ask the flight director for a structured reply (or the mock, if enabled).
 
-    The real provider call is not wired yet — that lands in plan 02, replacing
-    the single `raise` below with a `litellm.acompletion` call. The seam and
-    its signature do not change.
+    Real calls go through `litellm.acompletion`, with the JSON schema and the
+    Cerebras provider-routing hint both nested inside `extra_body` — never as
+    top-level keyword arguments, which OpenRouter's adapter silently drops.
     """
     if mock_mode_enabled():
         return mock_reply(fleet_context, user_message)
 
-    raise LLMError("live LLM calls are not wired yet - set LLM_MOCK=true")
+    api_key = os.environ.get("OPENROUTER_API_KEY", "").strip()
+    if not api_key:
+        raise LLMError("OPENROUTER_API_KEY is not set")
+
+    import litellm
+
+    try:
+        response = await litellm.acompletion(
+            model=MODEL,
+            api_key=api_key,
+            messages=build_messages(fleet_context, history, user_message),
+            temperature=TEMPERATURE,
+            max_tokens=MAX_TOKENS,
+            extra_body=_extra_body(),
+        )
+        raw_content = response.choices[0].message.content
+    except Exception as exc:
+        raise LLMError(f"flight director call failed: {exc}") from exc
+
+    return parse_reply(raw_content)
