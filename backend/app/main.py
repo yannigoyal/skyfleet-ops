@@ -11,6 +11,7 @@ from pathlib import Path
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 
+from app.chat import create_chat_router
 from app.db import Database
 from app.missions import (
     MissionQueue,
@@ -82,6 +83,7 @@ app = FastAPI(title="SkyFleet Ops", lifespan=lifespan)
 app.include_router(create_stream_router(telemetry_cache))
 app.include_router(create_missions_router(database, telemetry_cache, mission_queue))
 app.include_router(create_roster_router(database, telemetry_cache, telemetry_source))
+app.include_router(create_chat_router(database, telemetry_cache, telemetry_source))
 
 
 @app.get("/api/health")
