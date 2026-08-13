@@ -21,9 +21,9 @@ Requirements for this milestone (the entire remaining scope of PLAN.md). Databas
 - [ ] **CHAT-03**: AI flight director can recall missions on the operator's behalf through structured output, validated the same way
 - [ ] **CHAT-04**: AI flight director can add/remove roster drones through structured output, validated the same way
 - [x] **CHAT-05**: Chat conversation history persists in `chat_messages` and recent history is loaded into the prompt context for follow-up messages
-- [ ] **CHAT-06**: When `LLM_MOCK=true`, the backend returns deterministic mock responses instead of calling OpenRouter
+- [x] **CHAT-06**: When `LLM_MOCK=true`, the backend returns deterministic mock responses instead of calling OpenRouter
 - [ ] **CHAT-07**: When an LLM-issued mission/roster action fails validation (e.g., insufficient budget), the error is included in the chat response so the LLM can inform the operator
-- [ ] **CHAT-08**: LLM calls use LiteLLM → OpenRouter → `openrouter/openai/gpt-oss-120b` on Cerebras inference with an explicit `response_format` schema (not relying on auto-detection, per research: LiteLLM's `supports_response_schema()` can silently drop the schema for OpenRouter)
+- [x] **CHAT-08**: LLM calls use LiteLLM → OpenRouter → `openrouter/openai/gpt-oss-120b` on Cerebras inference with an explicit `response_format` schema (not relying on auto-detection, per research: LiteLLM's `supports_response_schema()` can silently drop the schema for OpenRouter)
 
 ### Frontend — Visualization & Detail
 
@@ -92,9 +92,9 @@ Deferred — not part of this milestone.
 | CHAT-03 | Phase 2 | Pending |
 | CHAT-04 | Phase 2 | Pending |
 | CHAT-05 | Phase 2 | Complete |
-| CHAT-06 | Phase 2 | Pending |
+| CHAT-06 | Phase 2 | Complete |
 | CHAT-07 | Phase 2 | Pending |
-| CHAT-08 | Phase 2 | Pending |
+| CHAT-08 | Phase 2 | Complete |
 | FE-01 | Phase 3 | Pending |
 | FE-02 | Phase 3 | Pending |
 | FE-03 | Phase 3 | Pending |
