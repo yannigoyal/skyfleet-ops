@@ -25,6 +25,7 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 .pnpm-store/
+*.tsbuildinfo
 
 # --- Database (runtime data) ---
 database/*.db

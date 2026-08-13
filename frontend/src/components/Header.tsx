@@ -3,11 +3,21 @@ import { ConnectionDot } from "./ConnectionDot";
 
 interface Props {
   connectionStatus: ConnectionStatus;
-  energyBudgetKwh: number;
-  activeMissionCount: number;
+  remainingKwh: number | null;
+  energyBudgetKwh: number | null;
+  activeMissionCount: number | null;
 }
 
-export function Header({ connectionStatus, energyBudgetKwh, activeMissionCount }: Props) {
+function formatKwh(value: number | null): string {
+  return value === null ? "—" : value.toFixed(1);
+}
+
+export function Header({
+  connectionStatus,
+  remainingKwh,
+  energyBudgetKwh,
+  activeMissionCount,
+}: Props) {
   return (
     <header className="flex items-center justify-between border-b border-ops-border bg-ops-panel px-6 py-3">
       <div className="flex items-center gap-3">
@@ -16,10 +26,16 @@ export function Header({ connectionStatus, energyBudgetKwh, activeMissionCount }
       </div>
       <div className="flex items-center gap-6 text-sm">
         <div className="text-slate-300">
-          Energy Budget: <span className="font-mono text-ops-teal">{energyBudgetKwh.toFixed(1)} kWh</span>
+          Energy Budget:{" "}
+          <span className="font-mono text-ops-teal">
+            {formatKwh(remainingKwh)} / {formatKwh(energyBudgetKwh)} kWh
+          </span>
         </div>
         <div className="text-slate-300">
-          Active Missions: <span className="font-mono text-ops-teal">{activeMissionCount}</span>
+          Active Missions:{" "}
+          <span className="font-mono text-ops-teal">
+            {activeMissionCount === null ? "—" : activeMissionCount}
+          </span>
         </div>
         <ConnectionDot status={connectionStatus} />
       </div>
