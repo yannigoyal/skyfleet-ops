@@ -2,19 +2,26 @@
 
 from __future__ import annotations
 
+import ast
 import json
+from pathlib import Path
 
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
 
 from app.chat import create_chat_router, llm, repository
 from app.chat.models import ChatMessage
+from app.db import Database
 from app.missions import MissionQueue, create_missions_router
-from app.telemetry import TelemetrySource
+from app.missions import repository as missions_repository
+from app.roster import create_roster_router
+from app.telemetry import TelemetryCache, TelemetrySource
 
 from .conftest import FakeSource, seed_telemetry
 
 DEFAULT_FLEET = [f"FALCON-{i:02d}" for i in range(1, 11)]
+
+CHAT_PACKAGE_DIR = Path(__file__).resolve().parents[2] / "app" / "chat"
 
 
 def _client(db, cache, source: TelemetrySource | None = None) -> TestClient:
@@ -24,6 +31,15 @@ def _client(db, cache, source: TelemetrySource | None = None) -> TestClient:
     serving the request."""
     app = FastAPI()
     app.include_router(create_chat_router(db, cache, source))
+    app.include_router(create_missions_router(db, cache, MissionQueue()))
+    return TestClient(app)
+
+
+def _client_with_roster(db, cache, source: TelemetrySource | None = None) -> TestClient:
+    """Mount the roster and missions routers (the manual side of the
+    differential — no chat router involved)."""
+    app = FastAPI()
+    app.include_router(create_roster_router(db, cache, source))
     app.include_router(create_missions_router(db, cache, MissionQueue()))
     return TestClient(app)
 
@@ -385,3 +401,151 @@ class TestHistoryReplay:
         assert messages[2] == {"role": "user", "content": "hi"}
         assert messages[3] == {"role": "assistant", "content": "hello"}
         assert messages[4] == {"role": "user", "content": "new message"}
+
+
+class TestRosterServiceParity:
+    """D2: chat-issued and manual roster removal must leave identical state.
+
+    Each half runs against its own freshly initialised Database (separate
+    tmp_path subdirectories) so neither side can see the other's rows —
+    a true differential, not two assertions against shared state.
+    """
+
+    async def test_chat_and_manual_removal_leave_identical_state(
+        self, tmp_path, mock_mode, monkeypatch
+    ):
+        # Side A: remove FALCON-01 through a chat-issued roster change.
+        db_a = Database(tmp_path / "side_a" / "skyfleet.db")
+        db_a.ensure_initialized()
+        cache_a = TelemetryCache()
+        _seed_fleet_telemetry(cache_a)
+        client_a = _client(db_a, cache_a)
+
+        launch_a = client_a.post(
+            "/api/fleet/missions",
+            json={"drone_id": "FALCON-01", "zone": "Riverside", "distance_km": 4.0},
+        )
+        assert launch_a.status_code == 201
+
+        _mock_reply(
+            monkeypatch,
+            llm.FlightDirectorReply(
+                message="Removing FALCON-01.",
+                roster_changes=[llm.RosterChange(drone_id="FALCON-01", action="remove")],
+            ),
+        )
+        chat_response = client_a.post("/api/chat", json={"message": "remove FALCON-01"})
+        assert chat_response.status_code == 200
+        assert chat_response.json()["errors"] == []
+
+        # Side B: remove FALCON-01 through the manual DELETE endpoint.
+        db_b = Database(tmp_path / "side_b" / "skyfleet.db")
+        db_b.ensure_initialized()
+        cache_b = TelemetryCache()
+        _seed_fleet_telemetry(cache_b)
+        client_b = _client_with_roster(db_b, cache_b)
+
+        launch_b = client_b.post(
+            "/api/fleet/missions",
+            json={"drone_id": "FALCON-01", "zone": "Riverside", "distance_km": 4.0},
+        )
+        assert launch_b.status_code == 201
+
+        delete_response = client_b.delete("/api/roster/FALCON-01")
+        assert delete_response.status_code == 204
+
+        # Compare final state, A against B, so a divergence in either
+        # direction fails.
+        roster_a = [r["drone_id"] for r in await db_a.fetchall(
+            "SELECT drone_id FROM fleet_roster ORDER BY drone_id", ()
+        )]
+        roster_b = [r["drone_id"] for r in await db_b.fetchall(
+            "SELECT drone_id FROM fleet_roster ORDER BY drone_id", ()
+        )]
+        assert roster_a == roster_b
+
+        en_route_a = await missions_repository.list_active_drone_ids(db_a)
+        en_route_b = await missions_repository.list_active_drone_ids(db_b)
+        assert en_route_a == en_route_b == set()
+
+        status_a = [r["status"] for r in await db_a.fetchall(
+            "SELECT status FROM missions WHERE drone_id = ?", ("FALCON-01",)
+        )]
+        status_b = [r["status"] for r in await db_b.fetchall(
+            "SELECT status FROM missions WHERE drone_id = ?", ("FALCON-01",)
+        )]
+        assert status_a == status_b
+
+        remaining_a = await missions_repository.get_remaining_kwh(db_a)
+        remaining_b = await missions_repository.get_remaining_kwh(db_b)
+        assert remaining_a == remaining_b
+
+        db_a.close()
+        db_b.close()
+
+    async def test_chat_removal_recalls_the_active_mission(self, db, cache, mock_mode, monkeypatch):
+        seed_telemetry(cache, "FALCON-01")
+        client = _client(db, cache)
+
+        launch = client.post(
+            "/api/fleet/missions",
+            json={"drone_id": "FALCON-01", "zone": "Riverside", "distance_km": 4.0},
+        )
+        assert launch.status_code == 201
+
+        _mock_reply(
+            monkeypatch,
+            llm.FlightDirectorReply(
+                message="Removing FALCON-01.",
+                roster_changes=[llm.RosterChange(drone_id="FALCON-01", action="remove")],
+            ),
+        )
+        response = client.post("/api/chat", json={"message": "remove FALCON-01"})
+        assert response.status_code == 200
+        assert response.json()["errors"] == []
+
+        assert await missions_repository.get_active_mission_for_drone(db, "FALCON-01") is None
+
+        row = await db.fetchone(
+            "SELECT status FROM missions WHERE drone_id = ?", ("FALCON-01",)
+        )
+        assert row["status"] != "en_route"
+
+
+class TestImportBoundary:
+    """Structural checks that fail at import-statement level before any
+    behavioural divergence could occur."""
+
+    def test_chat_router_reaches_domains_only_through_services(self):
+        source_path = CHAT_PACKAGE_DIR / "router.py"
+        tree = ast.parse(source_path.read_text())
+
+        mods: set[str] = set()
+        for node in ast.walk(tree):
+            if isinstance(node, ast.Import):
+                mods.update(alias.name for alias in node.names)
+            elif isinstance(node, ast.ImportFrom):
+                base = node.module or ""
+                mods.add(base)
+                mods.update(f"{base}.{alias.name}" for alias in node.names)
+
+        forbidden_prefixes = ("app.roster.repository", "app.missions.repository")
+        bad = sorted(m for m in mods if m.startswith(forbidden_prefixes))
+        assert not bad, f"chat/router.py must not import domain persistence modules, found: {bad}"
+        assert "app.roster.service" in mods
+        assert "app.missions.service" in mods
+
+    def test_chat_package_writes_only_its_own_table(self):
+        forbidden_tables = ("MISSIONS", "MISSION_LOG", "BUDGET_SNAPSHOTS", "FLEET_ROSTER")
+        found_chat_messages_write = False
+
+        for path in CHAT_PACKAGE_DIR.rglob("*.py"):
+            content = path.read_text().upper()
+            for table in forbidden_tables:
+                assert f"INSERT INTO {table}" not in content, f"{path} inserts into {table}"
+                assert f"UPDATE {table} " not in content, f"{path} updates {table}"
+                assert f"DELETE FROM {table}" not in content, f"{path} deletes from {table}"
+            if "INSERT INTO CHAT_MESSAGES" in content:
+                found_chat_messages_write = True
+
+        assert found_chat_messages_write, "expected chat/repository.py to still write chat_messages"
