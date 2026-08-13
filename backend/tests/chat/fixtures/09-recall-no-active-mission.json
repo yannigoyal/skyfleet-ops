@@ -1,0 +1,16 @@
+{
+  "id": "09-recall-no-active-mission",
+  "covers": ["D1", "D4", "CHAT-07"],
+  "seed": {},
+  "user_message": "Recall FALCON-06.",
+  "completion": "{\"message\": \"Recalling FALCON-06.\", \"missions\": [{\"drone_id\": \"FALCON-06\", \"action\": \"recall\", \"zone\": null, \"distance_km\": null}], \"roster_changes\": []}",
+  "expect": {
+    "status": 200,
+    "missions": [],
+    "roster_changes": [],
+    "error_contains": [["FALCON-06", "recall", "no_active_mission"]],
+    "mission_row_delta": 0,
+    "budget_delta_kwh": 0,
+    "chat_row_delta": 2
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "id": "05-read-only-question",
+  "covers": ["D7", "CHAT-01"],
+  "seed": {},
+  "user_message": "What's the fleet status?",
+  "completion": "{\"message\": \"All drones are idle, 500.0 kWh remaining, fleet healthy.\", \"missions\": [], \"roster_changes\": []}",
+  "expect": {
+    "status": 200,
+    "missions": [],
+    "roster_changes": [],
+    "error_contains": [],
+    "mission_row_delta": 0,
+    "budget_delta_kwh": 0,
+    "chat_row_delta": 2
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "id": "02-recall-en-route",
+  "covers": ["D7", "D5", "CHAT-03"],
+  "seed": {
+    "launch": [{"drone_id": "FALCON-04", "zone": "Downtown", "distance_km": 5.0}]
+  },
+  "user_message": "Recall FALCON-04.",
+  "completion": "{\"message\": \"Recalling FALCON-04.\", \"missions\": [{\"drone_id\": \"FALCON-04\", \"action\": \"recall\", \"zone\": null, \"distance_km\": null}], \"roster_changes\": []}",
+  "expect": {
+    "status": 200,
+    "missions": [{"drone_id": "FALCON-04", "action": "recall"}],
+    "roster_changes": [],
+    "error_contains": [],
+    "mission_row_delta": 0,
+    "budget_delta_kwh": 0,
+    "chat_row_delta": 2,
+    "final_mission_status": {"FALCON-04": "recalled"},
+    "final_active_mission_count": 0
+  }
+}

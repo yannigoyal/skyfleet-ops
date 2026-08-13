@@ -1,0 +1,16 @@
+{
+  "id": "10-non-json-completion",
+  "covers": ["D3", "D4", "CHAT-07"],
+  "seed": {},
+  "user_message": "What's the fleet status?",
+  "completion": "Sure, here's the fleet status:\n```json\n{\"message\": \"All good\", \"missions\": [], \"roster_changes\": []}\n```\nLet me know if you need anything else.",
+  "expect": {
+    "status": 502,
+    "missions": [],
+    "roster_changes": [],
+    "error_contains": [],
+    "mission_row_delta": 0,
+    "budget_delta_kwh": 0,
+    "chat_row_delta": 0
+  }
+}
