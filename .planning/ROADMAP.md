@@ -24,7 +24,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 
 - [x] **Phase 1: Roster Module** - Operator can add/remove/view tracked drones through a roster service mirroring the missions module shape (completed 2026-08-12)
 - [x] **Phase 2: AI Flight Director Chat** - Operator can delegate mission and roster actions to an LLM copilot, validated identically to manual dispatch (completed 2026-08-13)
-- [ ] **Phase 3: Frontend Buildout** - Operator gets the full ops-console UI: visualization, dispatch bar, and AI chat panel
+- [x] **Phase 3: Frontend Buildout** - Operator gets the full ops-console UI: visualization, dispatch bar, and AI chat panel (completed 2026-08-13)
 - [ ] **Phase 4: Docker Packaging & Test Suites** - Operator runs the whole platform with one command, verified by unit and E2E test suites
 
 ## Phase Details
@@ -105,7 +105,7 @@ Plans:
   4. Header shows live remaining energy budget, connection status, and active mission count
   5. The AI flight-director chat panel supports message input, scrolling conversation history, a loading indicator, and inline structured confirmation cards for AI-executed actions
 
-**Plans:** 6/6 plans executed
+**Plans:** 6/6 plans complete
 **UI hint**: yes
 
 Plans:
@@ -161,5 +161,5 @@ Phases execute in numeric order: 1 → 2 → 3 → 4
 |-------|----------------|--------|-----------|
 | 1. Roster Module | 4/4 | Complete    | 2026-08-12 |
 | 2. AI Flight Director Chat | 4/4 | Complete    | 2026-08-13 |
-| 3. Frontend Buildout | 6/6 | In Progress|  |
+| 3. Frontend Buildout | 6/6 | Complete    | 2026-08-13 |
 | 4. Docker Packaging & Test Suites | 0/TBD | Not started | - |
