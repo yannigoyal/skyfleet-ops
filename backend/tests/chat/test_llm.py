@@ -121,6 +121,17 @@ class TestParseReply:
                 '"roster_changes": []}',
                 id="invalid-action-enum",
             ),
+            pytest.param(
+                '{"message": "hi", "missions": [], "roster_changes": [], '
+                '"unexpected_field": "schema drift"}',
+                id="extra-top-level-field",
+            ),
+            pytest.param(
+                '{"message": "hi", "missions": [{"drone_id": "FALCON-01", '
+                '"action": "launch", "zone": "Riverside", "distance_km": 4.2, '
+                '"priority": "high"}], "roster_changes": []}',
+                id="extra-mission-action-field",
+            ),
         ],
     )
     def test_malformed_completions_raise_llm_error(self, raw):
