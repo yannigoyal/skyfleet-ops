@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-current_phase: 2
-current_phase_name: AI Flight Director Chat
-status: executing
-stopped_at: Completed 02-04-PLAN.md (wave 3) — all 4 plans executed, code review/verification pending
-last_updated: "2026-08-13T08:18:57.000Z"
+current_phase: 3
+current_phase_name: Frontend Buildout
+status: ready
+stopped_at: Phase 2 complete — code review (1 critical + 4 warning + 2 info, all fixed) and phase-goal verification (5/5 criteria, passed) both green
+last_updated: "2026-08-13T09:05:00.000Z"
 last_activity: 2026-08-13
-last_activity_desc: Phase 02 all waves complete (02-01..02-04); post-merge code review and phase verification next
+last_activity_desc: Phase 02 (AI Flight Director Chat) complete — verified and closed
 progress:
-  total_phases: 2
-  completed_phases: 1
+  total_phases: 4
+  completed_phases: 2
   total_plans: 8
   completed_plans: 8
 ---
@@ -23,16 +23,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-08-12)
 
 **Core value:** The dispatcher can watch a fleet of drones stream live telemetry, launch/recall missions against an energy budget, and delegate that same dispatching to an AI flight director through natural-language chat — all in one ATC-style console, single Docker command to run.
-**Current focus:** Phase 01 — roster-module
+**Current focus:** Phase 03 — frontend-buildout
 
 ## Current Position
 
-Phase: 2 — AI Flight Director Chat
-Plan: 4 of 4 complete
-Status: Executing — all plans merged, code review and phase verification next
-Last activity: 2026-08-13 — 02-04 merged (295/295 backend tests passing)
+Phase: 2 — AI Flight Director Chat — COMPLETE
+Plan: 4 of 4 complete, verified
+Status: Ready to plan Phase 3 (Frontend Buildout)
+Last activity: 2026-08-13 — Phase 2 verified (VERIFICATION.md: 5/5 criteria passed, 300/300 backend tests, ruff clean)
 
-Progress: [██████████] 100% (execution) — pending code review + phase-goal verification
+Progress: [█████░░░░░] 50% (2 of 4 phases complete)
 
 ## Performance Metrics
 
@@ -62,6 +62,7 @@ Progress: [██████████] 100% (execution) — pending code rev
 | Phase 02 P02 | 25min | 3 tasks | 4 files |
 | Phase 02 P03 | 25min | 2 tasks | 2 files |
 | Phase 02 P04 | 45min | 2 tasks | 19 files |
+| Phase 02 review-fix | ~20min | 7 findings | 6 files |
 
 ## Accumulated Context
 
@@ -76,6 +77,7 @@ Recent decisions affecting current work:
 - [Phase 2]: Chat write path reaches roster/missions only through their service modules, never persistence, enforced by an AST import-boundary test and a two-database differential test
 - [Phase 2]: CHAT-08 fix confirmed working end to end: real litellm.acompletion call with response_format/provider nested in extra_body, verified against live OpenRouter/Cerebras endpoint (3/3 prompts passed, bare JSON, under 5s each)
 - [Phase 2]: Fourteen-scenario offline reference dataset (backend/tests/chat/fixtures/) is the phase's CI gate — replays canned completions through the real endpoint, no network, no judge model; new fixtures added only from real observed failures, never speculative coverage
+- [Phase 2]: Post-merge code review caught a real data-integrity bug (NaN distance_km from the LLM bypassing every guard and permanently corrupting the energy budget via the append-only mission_log) — fixed at both the Pydantic and router precondition layers, pinned by fixture 15. All 7 review findings (1 critical, 4 warning, 2 info) fixed before phase closeout; see 02-REVIEW.md and 02-VERIFICATION.md
 
 ### Pending Todos
 
@@ -98,6 +100,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-08-13T08:18:57.000Z
-Stopped at: Completed 02-04-PLAN.md (wave 3) — all 4 plans of Phase 2 executed and merged
+Last session: 2026-08-13T09:05:00.000Z
+Stopped at: Phase 2 complete and verified. Next: plan Phase 3 (Frontend Buildout) — /gsd-plan-phase 3
 Resume file: None

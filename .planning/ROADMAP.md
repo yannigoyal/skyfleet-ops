@@ -23,7 +23,7 @@ finalized to be meaningful, and reuse the `LLM_MOCK` path already proven out in 
 Decimal phases appear between their surrounding integers in numeric order.
 
 - [x] **Phase 1: Roster Module** - Operator can add/remove/view tracked drones through a roster service mirroring the missions module shape (completed 2026-08-12)
-- [ ] **Phase 2: AI Flight Director Chat** - Operator can delegate mission and roster actions to an LLM copilot, validated identically to manual dispatch
+- [x] **Phase 2: AI Flight Director Chat** - Operator can delegate mission and roster actions to an LLM copilot, validated identically to manual dispatch (completed 2026-08-13)
 - [ ] **Phase 3: Frontend Buildout** - Operator gets the full ops-console UI: visualization, dispatch bar, and AI chat panel
 - [ ] **Phase 4: Docker Packaging & Test Suites** - Operator runs the whole platform with one command, verified by unit and E2E test suites
 
@@ -132,6 +132,6 @@ Phases execute in numeric order: 1 → 2 → 3 → 4
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Roster Module | 4/4 | Complete    | 2026-08-12 |
-| 2. AI Flight Director Chat | 2/4 | In Progress|  |
+| 2. AI Flight Director Chat | 4/4 | Complete    | 2026-08-13 |
 | 3. Frontend Buildout | 0/TBD | Not started | - |
 | 4. Docker Packaging & Test Suites | 0/TBD | Not started | - |
