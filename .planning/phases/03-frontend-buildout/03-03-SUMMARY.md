@@ -179,3 +179,10 @@ The manual dispatch loop (launch + recall) is complete and self-consistent, and 
 ---
 *Phase: 03-frontend-buildout*
 *Completed: 2026-08-13*
+
+## Self-Check: PASSED
+
+All five key files verified present on disk (`frontend/src/components/DispatchBar.tsx`,
+`frontend/src/components/DispatchBar.test.tsx`, `frontend/src/components/MissionsTable.tsx`,
+`frontend/src/components/MissionsTable.test.tsx`, this SUMMARY.md). All five commits
+(`b10edbb`, `c79006b`, `1037506`, `9907ab9`, `7fc3c0f`) verified present in `git log`.
