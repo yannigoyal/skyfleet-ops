@@ -1,0 +1,16 @@
+{
+  "id": "08-over-budget-launch",
+  "covers": ["D1", "D4", "CHAT-07"],
+  "seed": {},
+  "user_message": "Launch FALCON-08 to Farfield, 700 km.",
+  "completion": "{\"message\": \"Launching FALCON-08 to Farfield (700 km).\", \"missions\": [{\"drone_id\": \"FALCON-08\", \"action\": \"launch\", \"zone\": \"Farfield\", \"distance_km\": 700.0}], \"roster_changes\": []}",
+  "expect": {
+    "status": 200,
+    "missions": [],
+    "roster_changes": [],
+    "error_contains": [["FALCON-08", "insufficient_budget"]],
+    "mission_row_delta": 0,
+    "budget_delta_kwh": 0,
+    "chat_row_delta": 2
+  }
+}

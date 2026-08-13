@@ -1,0 +1,16 @@
+{
+  "id": "01-explicit-launch",
+  "covers": ["D7", "D5", "CHAT-02"],
+  "seed": {},
+  "user_message": "Launch FALCON-03 to Riverside, 4.2 km.",
+  "completion": "{\"message\": \"Launching FALCON-03 to Riverside (4.2 km).\", \"missions\": [{\"drone_id\": \"FALCON-03\", \"action\": \"launch\", \"zone\": \"Riverside\", \"distance_km\": 4.2}], \"roster_changes\": []}",
+  "expect": {
+    "status": 200,
+    "missions": [{"drone_id": "FALCON-03", "action": "launch"}],
+    "roster_changes": [],
+    "error_contains": [],
+    "mission_row_delta": 1,
+    "budget_delta_kwh": -3.36,
+    "chat_row_delta": 2
+  }
+}

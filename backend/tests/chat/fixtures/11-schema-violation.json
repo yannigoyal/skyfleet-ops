@@ -1,0 +1,16 @@
+{
+  "id": "11-schema-violation",
+  "covers": ["D3", "D4", "CHAT-07"],
+  "seed": {},
+  "user_message": "Abort FALCON-09's flight.",
+  "completion": "{\"missions\": [{\"drone_id\": \"FALCON-09\", \"action\": \"abort\", \"zone\": \"Docklands\", \"distance_km\": 2.0}], \"roster_changes\": []}",
+  "expect": {
+    "status": 502,
+    "missions": [],
+    "roster_changes": [],
+    "error_contains": [],
+    "mission_row_delta": 0,
+    "budget_delta_kwh": 0,
+    "chat_row_delta": 0
+  }
+}

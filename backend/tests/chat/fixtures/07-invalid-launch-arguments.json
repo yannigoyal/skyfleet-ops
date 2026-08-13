@@ -1,0 +1,16 @@
+{
+  "id": "07-invalid-launch-arguments",
+  "covers": ["D1", "D4", "CHAT-07"],
+  "seed": {},
+  "user_message": "Launch FALCON-06 with a bad distance, and FALCON-07 with no zone.",
+  "completion": "{\"message\": \"Launching FALCON-06 and FALCON-07.\", \"missions\": [{\"drone_id\": \"FALCON-06\", \"action\": \"launch\", \"zone\": \"Midtown\", \"distance_km\": -2.0}, {\"drone_id\": \"FALCON-07\", \"action\": \"launch\", \"zone\": null, \"distance_km\": 5.0}], \"roster_changes\": []}",
+  "expect": {
+    "status": 200,
+    "missions": [],
+    "roster_changes": [],
+    "error_contains": [["FALCON-06", "missing zone or distance"], ["FALCON-07", "missing zone or distance"]],
+    "mission_row_delta": 0,
+    "budget_delta_kwh": 0,
+    "chat_row_delta": 2
+  }
+}

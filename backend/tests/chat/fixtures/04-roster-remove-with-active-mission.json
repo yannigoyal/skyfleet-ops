@@ -1,0 +1,20 @@
+{
+  "id": "04-roster-remove-with-active-mission",
+  "covers": ["D2", "CHAT-04"],
+  "seed": {
+    "launch": [{"drone_id": "FALCON-05", "zone": "Uptown", "distance_km": 3.0}]
+  },
+  "user_message": "Remove FALCON-05 from the roster.",
+  "completion": "{\"message\": \"Removing FALCON-05 from the roster.\", \"missions\": [], \"roster_changes\": [{\"drone_id\": \"FALCON-05\", \"action\": \"remove\"}]}",
+  "expect": {
+    "status": 200,
+    "missions": [],
+    "roster_changes": [{"drone_id": "FALCON-05", "action": "remove"}],
+    "error_contains": [],
+    "mission_row_delta": 0,
+    "budget_delta_kwh": 0,
+    "chat_row_delta": 2,
+    "final_mission_status": {"FALCON-05": "recalled"},
+    "final_active_mission_count": 0
+  }
+}

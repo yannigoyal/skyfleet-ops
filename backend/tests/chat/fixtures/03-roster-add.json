@@ -1,0 +1,16 @@
+{
+  "id": "03-roster-add",
+  "covers": ["D7", "CHAT-04"],
+  "seed": {},
+  "user_message": "Add FALCON-11 to the roster.",
+  "completion": "{\"message\": \"Adding FALCON-11 to the roster.\", \"missions\": [], \"roster_changes\": [{\"drone_id\": \"FALCON-11\", \"action\": \"add\"}]}",
+  "expect": {
+    "status": 200,
+    "missions": [],
+    "roster_changes": [{"drone_id": "FALCON-11", "action": "add"}],
+    "error_contains": [],
+    "mission_row_delta": 0,
+    "budget_delta_kwh": 0,
+    "chat_row_delta": 2
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "id": "06-hallucinated-drone",
+  "covers": ["D1", "D4", "CHAT-07"],
+  "seed": {},
+  "user_message": "Launch FALCON-99 to Downtown, 3 km.",
+  "completion": "{\"message\": \"Launching FALCON-99 to Downtown.\", \"missions\": [{\"drone_id\": \"FALCON-99\", \"action\": \"launch\", \"zone\": \"Downtown\", \"distance_km\": 3.0}], \"roster_changes\": []}",
+  "expect": {
+    "status": 200,
+    "missions": [],
+    "roster_changes": [],
+    "error_contains": [["FALCON-99", "launch", "unknown_drone"]],
+    "mission_row_delta": 0,
+    "budget_delta_kwh": 0,
+    "chat_row_delta": 2
+  }
+}
