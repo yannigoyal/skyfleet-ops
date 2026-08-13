@@ -113,6 +113,10 @@ def create_chat_router(
         try:
             reply = await generate_reply(fleet_context, history, request.message)
         except LLMError as exc:
+            # G1: log the raw failed-completion detail at INFO for diagnosis --
+            # this is the only place a 502/LLMError turn is ever observed,
+            # since the per-turn logger.info call below never runs for it.
+            logger.info("chat turn: llm_error reason=%s detail=%s", exc.reason, str(exc)[:500])
             raise HTTPException(
                 status_code=502, detail={"reason": exc.reason, "detail": str(exc)}
             ) from exc
