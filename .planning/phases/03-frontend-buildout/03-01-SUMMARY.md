@@ -127,3 +127,10 @@ The Vitest harness is fully operational: jsdom environment, `@/` alias resolutio
 ---
 *Phase: 03-frontend-buildout*
 *Completed: 2026-08-13*
+
+## Self-Check: PASSED
+
+All created files verified present on disk (`frontend/vitest.config.ts`,
+`frontend/vitest.setup.ts`, `frontend/src/components/ConnectionDot.test.tsx`,
+this SUMMARY.md). Both commits (`8098334`, `c781327`) verified present in
+`git log`.
