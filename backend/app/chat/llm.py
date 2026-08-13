@@ -12,7 +12,7 @@ import json
 import os
 from typing import Literal
 
-from pydantic import BaseModel, Field, ValidationError
+from pydantic import BaseModel, ConfigDict, Field, ValidationError
 
 from .models import ChatMessage, LLMError
 
@@ -81,6 +81,12 @@ RESPONSE_SCHEMA = {
 
 
 class MissionAction(BaseModel):
+    # extra="forbid": this model is the "second, independent validation
+    # layer" AI-SPEC §3 says is actually trusted -- RESPONSE_SCHEMA already
+    # sets additionalProperties: false, and Pydantic's default extra="ignore"
+    # would silently accept schema drift instead of raising LLMError.
+    model_config = ConfigDict(extra="forbid")
+
     drone_id: str
     action: Literal["launch", "recall"]
     zone: str | None = None
@@ -92,11 +98,15 @@ class MissionAction(BaseModel):
 
 
 class RosterChange(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
     drone_id: str
     action: Literal["add", "remove"]
 
 
 class FlightDirectorReply(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
     message: str
     missions: list[MissionAction] = Field(default_factory=list)
     roster_changes: list[RosterChange] = Field(default_factory=list)
