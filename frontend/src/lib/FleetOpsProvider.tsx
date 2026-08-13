@@ -73,6 +73,13 @@ export function FleetOpsProvider({ children }: { children: ReactNode }) {
   // older call's response, however late it arrives, is discarded rather
   // than rolling the budget/mission state backward.
   const latestRequestIdRef = useRef(0);
+  // Guards against a slow in-flight refetch() resolving after the provider
+  // has unmounted, mirroring the cancelled-flag pattern EnergyBudgetChart
+  // uses for its own fetch effect — refetch() is invoked both from the poll
+  // interval and imperatively by callers outside this effect (dispatch,
+  // recall, chat), so the guard lives on the shared ref rather than a
+  // single effect-scoped closure.
+  const isMountedRef = useRef(true);
 
   const upsertMission = useCallback((mission: Mission) => {
     missionsRef.current = new Map(missionsRef.current).set(mission.id, mission);
@@ -81,30 +88,42 @@ export function FleetOpsProvider({ children }: { children: ReactNode }) {
 
   const refetch = useCallback(async () => {
     const requestId = ++latestRequestIdRef.current;
-    const [fleetRes, rosterRes] = await Promise.all([
-      fetch("/api/fleet"),
-      fetch("/api/roster"),
-    ]);
-    const fleetData: FleetStatus = await fleetRes.json();
-    const rosterData: { drones: RosterDrone[] } = await rosterRes.json();
+    try {
+      const [fleetRes, rosterRes] = await Promise.all([
+        fetch("/api/fleet"),
+        fetch("/api/roster"),
+      ]);
+      if (!fleetRes.ok || !rosterRes.ok) {
+        throw new Error(`fleet=${fleetRes.status} roster=${rosterRes.status}`);
+      }
+      const fleetData: FleetStatus = await fleetRes.json();
+      const rosterData: { drones: RosterDrone[] } = await rosterRes.json();
 
-    if (requestId !== latestRequestIdRef.current) return;
+      if (requestId !== latestRequestIdRef.current || !isMountedRef.current) return;
 
-    setBudget({
-      energyBudgetKwh: fleetData.energy_budget_kwh,
-      remainingKwh: fleetData.remaining_kwh,
-      activeMissionCount: fleetData.active_mission_count,
-    });
-    missionsRef.current = mergeMissions(missionsRef.current, fleetData.missions);
-    setMissions(Array.from(missionsRef.current.values()));
-    setRoster(rosterData.drones);
-    setLoaded(true);
+      setBudget({
+        energyBudgetKwh: fleetData.energy_budget_kwh,
+        remainingKwh: fleetData.remaining_kwh,
+        activeMissionCount: fleetData.active_mission_count,
+      });
+      missionsRef.current = mergeMissions(missionsRef.current, fleetData.missions);
+      setMissions(Array.from(missionsRef.current.values()));
+      setRoster(rosterData.drones);
+      setLoaded(true);
+    } catch {
+      // Keep last-known state; the next interval tick retries automatically.
+      // Consider surfacing a connection-degraded indicator here.
+    }
   }, []);
 
   useEffect(() => {
+    isMountedRef.current = true;
     refetch();
     const id = setInterval(refetch, FLEET_POLL_INTERVAL_MS);
-    return () => clearInterval(id);
+    return () => {
+      isMountedRef.current = false;
+      clearInterval(id);
+    };
   }, [refetch]);
 
   return (

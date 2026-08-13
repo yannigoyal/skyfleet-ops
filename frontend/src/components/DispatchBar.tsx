@@ -40,6 +40,8 @@ export function DispatchBar() {
       }
       upsertMission(body);
       await refetch();
+    } catch {
+      setError({ reason: "connection_error" });
     } finally {
       setSubmitting(false);
     }

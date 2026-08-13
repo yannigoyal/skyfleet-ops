@@ -34,14 +34,30 @@ function batteryFill(pct: number): string {
 }
 
 /**
+ * Recharts' Treemap `content` render-prop type is untyped (`any`) upstream;
+ * this narrows it to the fields this renderer actually reads rather than
+ * trusting Recharts' shape wholesale — a future prop rename or destructure
+ * typo now fails to compile instead of surfacing only as a runtime
+ * `undefined`.
+ */
+interface CellContentProps {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  name?: string;
+  batteryPct?: number;
+}
+
+/**
  * SVG-only cell renderer (Pitfall 3): g/rect/text primitives only, no HTML
  * elements, since Recharts renders this subtree inside an <svg>. The
  * battery percentage text is load-bearing, not decoration — it is the
  * non-colour cue a red/green colour-blind dispatcher needs to identify a
  * critical drone, satisfying this plan's colour-only prohibition.
  */
-function CellContent(props: any) {
-  const { x, y, width, height, name, batteryPct } = props;
+function CellContent(props: unknown) {
+  const { x, y, width, height, name, batteryPct } = props as CellContentProps;
   // Recharts also invokes `content` once for the synthetic root/container
   // node (depth 0) that wraps all data leaves — it carries no batteryPct,
   // since it isn't one of our HeatmapDatum entries. Render nothing for it.
@@ -104,7 +120,7 @@ export function FleetHeatmap({ snapshot }: Props) {
           dataKey="value"
           isAnimationActive={false}
           content={<CellContent />}
-          onClick={(node: any) => select(node.name)}
+          onClick={(node: unknown) => select((node as { name?: string }).name ?? null)}
         />
       </div>
     </div>

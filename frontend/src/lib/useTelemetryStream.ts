@@ -33,7 +33,15 @@ export function useTelemetryStream(maxHistoryPoints = 120) {
 
     source.onmessage = (event) => {
       setStatus("connected");
-      const data: TelemetrySnapshot = JSON.parse(event.data);
+      let data: TelemetrySnapshot;
+      try {
+        data = JSON.parse(event.data);
+      } catch {
+        // A malformed/truncated SSE payload drops this update; the next
+        // message on the stream recovers state, matching the "connected"
+        // status already set above.
+        return;
+      }
       setSnapshot(data);
 
       for (const [droneId, reading] of Object.entries(data)) {
