@@ -11,7 +11,7 @@ import { FleetOpsProvider, useFleetOps } from "@/lib/FleetOpsProvider";
 // (sections 8-10). The dispatch bar and live fleet header are wired up
 // through FleetOpsProvider; chat remains a placeholder — see plan 06.
 function Console() {
-  const { snapshot, status } = useTelemetryStream();
+  const { snapshot, status, history } = useTelemetryStream();
   const { remainingKwh, energyBudgetKwh, activeMissionCount, selectedDroneId, select } =
     useFleetOps();
 
@@ -26,7 +26,12 @@ function Console() {
       <main className="grid flex-1 grid-cols-1 gap-4 p-6 lg:grid-cols-3">
         <div className="flex flex-col gap-4 lg:col-span-2">
           <DispatchBar />
-          <FleetRosterPanel snapshot={snapshot} selectedDroneId={selectedDroneId} onSelect={select} />
+          <FleetRosterPanel
+            snapshot={snapshot}
+            history={history}
+            selectedDroneId={selectedDroneId}
+            onSelect={select}
+          />
           <MissionsTable />
         </div>
         <aside className="rounded-lg border border-ops-border bg-ops-panel p-4 text-sm text-slate-400">
