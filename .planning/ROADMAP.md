@@ -105,7 +105,7 @@ Plans:
   4. Header shows live remaining energy budget, connection status, and active mission count
   5. The AI flight-director chat panel supports message input, scrolling conversation history, a loading indicator, and inline structured confirmation cards for AI-executed actions
 
-**Plans:** 3/6 plans executed
+**Plans:** 4/6 plans executed
 **UI hint**: yes
 
 Plans:
@@ -123,7 +123,7 @@ Plans:
 
 **Wave 4** *(blocked on Wave 3)*
 
-- [ ] 03-04-PLAN.md — Capped altitude/speed history (D-03), roster battery sparklines (FE-01), and the drone detail panel (FE-02, D-16)
+- [x] 03-04-PLAN.md — Capped altitude/speed history (D-03), roster battery sparklines (FE-01), and the drone detail panel (FE-02, D-16)
 
 **Wave 5** *(blocked on Wave 4)*
 
@@ -161,5 +161,5 @@ Phases execute in numeric order: 1 → 2 → 3 → 4
 |-------|----------------|--------|-----------|
 | 1. Roster Module | 4/4 | Complete    | 2026-08-12 |
 | 2. AI Flight Director Chat | 4/4 | Complete    | 2026-08-13 |
-| 3. Frontend Buildout | 3/6 | In Progress|  |
+| 3. Frontend Buildout | 4/6 | In Progress|  |
 | 4. Docker Packaging & Test Suites | 0/TBD | Not started | - |
