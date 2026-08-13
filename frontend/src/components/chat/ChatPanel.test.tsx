@@ -42,11 +42,9 @@ function renderPanel() {
 describe("ChatPanel — docked, collapsible flight-director sidebar", () => {
   beforeEach(() => {
     vi.stubGlobal("EventSource", NoOpEventSource as unknown as typeof EventSource);
-    if (!("scrollIntoView" in HTMLElement.prototype)) {
-      HTMLElement.prototype.scrollIntoView = vi.fn();
-    } else {
-      vi.spyOn(HTMLElement.prototype, "scrollIntoView").mockImplementation(() => {});
-    }
+    // jsdom has no scrollIntoView implementation; vitest.setup.ts polyfills a
+    // no-op globally so the type exists — spy on it here to assert calls.
+    vi.spyOn(HTMLElement.prototype, "scrollIntoView").mockImplementation(() => {});
     stubFetch();
   });
 

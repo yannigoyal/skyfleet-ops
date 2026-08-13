@@ -11,3 +11,9 @@ class ResizeObserverStub {
 if (typeof globalThis.ResizeObserver === "undefined") {
   globalThis.ResizeObserver = ResizeObserverStub as unknown as typeof ResizeObserver;
 }
+
+// jsdom has no scrollIntoView implementation; ChatPanel calls it on every
+// new transcript turn to auto-scroll to the newest message (FE-08).
+if (typeof HTMLElement.prototype.scrollIntoView === "undefined") {
+  HTMLElement.prototype.scrollIntoView = function scrollIntoViewStub() {};
+}
