@@ -99,7 +99,17 @@ async def _execute_roster_change(
 def _extract_reason(error_message: str) -> str:
     """Pull the trailing service `reason` key off a formatted error string
     (see _execute_mission/_execute_roster_change above), e.g.
-    "...: unknown_drone." -> "unknown_drone"."""
+    "...: unknown_drone." -> "unknown_drone".
+
+    TODO: fragile -- this re-derives `exc.reason` (already in hand at the
+    call sites above) by re-parsing the formatted message's trailing
+    ": {reason}." convention. A future error-message format change (e.g.
+    trailing context after the reason) would silently break the log line's
+    reasons= field with no test catching it. Prefer threading the reason
+    through _execute_mission/_execute_roster_change's return shape directly
+    (e.g. a small Failure(drone_id, message, reason) type) over parsing it
+    back out of the string.
+    """
     return error_message.rsplit(": ", 1)[-1].rstrip(".")
 
 
