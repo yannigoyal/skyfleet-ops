@@ -149,7 +149,7 @@ panels into `frontend/src/app/page.tsx` and no two plans can own that file in th
   4. Backend and frontend unit test suites pass, covering roster service/repository/router logic, chat/LLM structured-output parsing and validation delegation, and the new frontend components
   5. A Playwright E2E suite, isolated via `tests/docker-compose.test.yml` and run with `LLM_MOCK=true`, passes covering fresh start, roster add/remove, mission launch/recall with budget updates, visualization rendering, mocked AI chat, and SSE disconnect/reconnect resilience
 
-**Plans:** 4/4 plans executed
+**Plans:** 6 plans (4 executed + 2 gap closure)
 
 Plans:
 **Wave 1**
@@ -164,6 +164,11 @@ Plans:
 **Wave 3** *(blocked on Wave 2 completion)*
 
 - [x] 04-04-PLAN.md — Cover TEST-04 scenarios 4-6 (visualization rendering, mocked AI chat, SSE disconnect/reconnect) and correct the suite README
+
+**Gap closure** *(from 04-UAT.md — run via `/gsd-execute-phase 4 --gaps-only`; both plans are Wave 1 and share no files, so they run in parallel)*
+
+- [ ] 04-05-PLAN.md — G-04-2: bounded `/api/health` readiness poll between container start and browser open in both start scripts, so the first page load is never a connection-refused error (DEPLOY-02, DEPLOY-03)
+- [ ] 04-06-PLAN.md — G-04-3: drop the E2E harness's unnecessary host port publish so it runs independently of a production container on port 8000, and correct the README's causal attribution (TEST-04, TEST-05)
 
 ## Progress
 
