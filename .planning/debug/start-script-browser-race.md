@@ -1,8 +1,8 @@
 ---
-status: diagnosed
+status: resolved
 trigger: "start-script-browser-race — After running the start script, the browser opens showing \"page not working\" for 2-3 seconds before the app becomes reachable."
 created: 2026-08-14T07:32:34Z
-updated: 2026-08-14T07:32:34Z
+updated: 2026-08-14T12:15:00Z
 ---
 
 ## Current Focus
@@ -109,6 +109,29 @@ root_cause: |
   This was checked against the alternative hypothesis of unusually slow FastAPI startup
   work (lazy DB init, simulator warmup, LLM client init) and that hypothesis was
   eliminated — those code paths are fast; the missing wait/poll is the sole root cause.
-fix: (not applied — goal is find_root_cause_only)
-verification: (not applicable — no fix stage in this mode)
-files_changed: []
+fix: |
+  Applied by plan 04-05 (gap G-04-2). Added `scripts/wait_for_health.sh`, a deadline-bounded
+  poll that curls the URL with `-fs --max-time 2 -o /dev/null` until it answers, exiting 0 when
+  ready, 1 at the deadline, and 2 when curl is unavailable. Wired into `scripts/start_mac.sh`
+  between the `docker run -d` block and the "is running at" message, capturing the status with
+  `|| READY=$?` so `set -euo pipefail` cannot abort on a timeout, and branching three ways
+  (ready / curl-missing / timeout warning naming `docker logs skyfleet-ops`). The browser is
+  opened in all three cases, so an unhealthy container degrades to the prior behavior rather
+  than to a failed script. `scripts/start_windows.ps1` got the equivalent `Wait-ForHealth`
+  function (deadline via `AddSeconds`, `Invoke-WebRequest -TimeoutSec 2`, paced `Start-Sleep`)
+  called before `Start-Process`.
+verification: |
+  `scripts/tests/test_wait_for_health.sh` pins three behaviors without Docker, serving a temp
+  docroot containing `api/health` via `python3 -m http.server`: endpoint already up (exits 0),
+  endpoint appearing ~2s late (exits 0, asserted elapsed >= 2s so an early return or fixed sleep
+  fails), and nothing listening (non-zero, bounded). 3/3 pass. `bash -n` clean; comment-filtered
+  ordering assertion confirms the poll precedes the browser open in both scripts. A `set -euo
+  pipefail` simulation confirms a timeout reaches end-of-script with exit 0. UAT test 2 re-run
+  by the user: pass.
+files_changed:
+  - scripts/wait_for_health.sh
+  - scripts/tests/test_wait_for_health.sh
+  - scripts/start_mac.sh
+  - scripts/start_windows.ps1
+resolved_by: 04-05-PLAN.md
+resolved_at: 2026-08-14

@@ -1,8 +1,8 @@
 ---
-status: diagnosed
+status: resolved
 trigger: "Investigate issue: e2e-harness-port-conflict — The Playwright E2E test harness (tests/docker-compose.test.yml) fails to start because its app service tries to bind host port 8000, which is already occupied by a production container started via scripts/start_mac.sh."
 created: 2026-08-14T00:00:00Z
-updated: 2026-08-14T00:00:00Z
+updated: 2026-08-14T12:15:00Z
 ---
 
 ## Current Focus
@@ -98,6 +98,39 @@ started: Discovered during UAT for phase 04, immediately after testing scripts/s
 ## Resolution
 
 root_cause: "tests/docker-compose.test.yml's `app` service hardcodes a host port publish (`8000:8000`) that duplicates the port used by scripts/start_mac.sh's long-lived, detached production container (`docker run -d -p 8000:8000`) — and that host port publish is not actually required for the E2E suite to function, since Playwright reaches the app over the internal Compose network via `http://app:8000` and the healthcheck's `curl http://localhost:8000` executes inside the app container's own namespace. tests/README.md's existing note (line 14) gives the correct remediation command (`./scripts/stop_mac.sh`) but misattributes the collision's cause to the secondary `docker/docker-compose.yml` convenience wrapper rather than to `scripts/start_mac.sh`'s raw `docker run` (the actual documented single-command production launch path per PLAN.md section 11, and the one exercised in UAT Test 2) — under-documenting the specific collision this UAT gap reports. More importantly, the UAT's expected behavior (G-04-3) calls for the harness to succeed independent of any running production container, which a manual-pre-stop documentation note cannot satisfy even when accurate — this is a structural/design gap in the test harness, not solely a documentation gap."
-fix: ""
-verification: ""
-files_changed: []
+fix: |
+  Applied by plan 04-06 (gap G-04-3). Removed the `ports: - "8000:8000"` mapping from the `app`
+  service in tests/docker-compose.test.yml, leaving the service reachable only on the private
+  Compose network, and added a comment recording why the omission is deliberate plus the
+  `ports: ["8001:8000"]` debugging escape hatch. tests/README.md's pre-flight paragraph was
+  rewritten to state that no pre-stop is needed, to attribute the historical collision to
+  scripts/start_mac.sh's detached `docker run -d -p 8000:8000` (not the optional
+  docker/docker-compose.yml wrapper), and to explain the internal `http://app:8000` path.
+
+  A second, previously hidden blocker was found and fixed while proving this live: the app
+  healthcheck ran `curl`, which does not exist in the python:3.12-slim-based image, so the
+  service was permanently unhealthy (failing streak 11) despite serving 200 — meaning
+  playwright's `depends_on: condition: service_healthy` could never have opened even with the
+  port conflict gone. The port error simply failed earlier and masked it. Replaced with a
+  python3 urllib probe against the same /api/health URL; no production image change. Confirmed
+  contained: docker/docker-compose.yml defines no healthcheck and docker/Dockerfile has none.
+verification: |
+  Live A/B on one machine with the real production skyfleet-ops container holding
+  0.0.0.0:8000->8000/tcp. B (old mapping re-added via a throwaway override) reproduced the
+  reported error verbatim — "failed to set up container networking: driver failed programming
+  external connectivity on endpoint tests-app-1 ...: Bind for 0.0.0.0:8000 failed: port is
+  already allocated", exit 1. A (committed config) started clean, exit 0, state=running, with
+  `docker port tests-app-1` empty. Healthcheck reached `healthy` with failing_streak=0, and the
+  run progressed to `tests-playwright-1 Starting`, which the harness had never previously done.
+  Structural gate on the resolved `docker compose config --format json` model asserts no host
+  publish, BASE_URL http://app:8000, an /api/health probe that does not invoke curl, and the
+  service_healthy gate. UAT test 3 re-run by the user: pass.
+
+  Not covered on the verifying machine: the full seven-spec double run, blocked by a Docker
+  Desktop file-sharing restriction on the playwright service's `.:/e2e` mount ("The path
+  .../tests is not shared from the host") — host configuration, not a repo defect.
+files_changed:
+  - tests/docker-compose.test.yml
+  - tests/README.md
+resolved_by: 04-06-PLAN.md
+resolved_at: 2026-08-14
