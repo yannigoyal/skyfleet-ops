@@ -1,9 +1,9 @@
 ---
-status: partial
+status: diagnosed
 phase: 04-docker-packaging-test-suites
 source: [04-VERIFICATION.md]
 started: 2026-08-14T06:57:12Z
-updated: 2026-08-14T07:20:00Z
+updated: 2026-08-14T07:30:00Z
 ---
 
 ## Current Test
@@ -76,8 +76,15 @@ blocked: 0
   reason: "User reported: after starting the script it takes 2 3 second to load in the meantime the screen shows page is not working"
   severity: major
   test: 2
-  artifacts: []
-  missing: []
+  root_cause: "scripts/start_mac.sh and scripts/start_windows.ps1 launch the container detached (docker run -d) and immediately open the browser, with no readiness wait or health-endpoint poll in between. uvicorn startup (uv env resolution, imports, DB init, telemetry warmup) takes ~2-3s, so the browser's first request always lands before the server is accepting connections."
+  artifacts:
+    - path: "scripts/start_mac.sh"
+      issue: "no readiness wait/poll between `docker run -d` and `open`"
+    - path: "scripts/start_windows.ps1"
+      issue: "no readiness wait/poll between `docker run -d` and `Start-Process`"
+  missing:
+    - "Bounded polling loop against /api/health (curl / Invoke-WebRequest) between container start and browser open, in both scripts"
+  debug_session: .planning/debug/start-script-browser-race.md
 
 - gap_id: G-04-3
   truth: "The E2E test harness (tests/docker-compose.test.yml) starts its app service on port 8000 without conflicting with a production container already running on the same host port."
@@ -85,12 +92,13 @@ blocked: 0
   reason: "User reported: failed to set up container networking: driver failed programming external connectivity on endpoint tests-app-1: Bind for 0.0.0.0:8000 failed: port is already allocated"
   severity: blocker
   test: 3
-  artifacts: []
-  missing: []
-
-None found at the code level (prior to this session's UAT). All gaps are live-execution evidence gaps caused by this sandbox
-having no reachable Docker daemon and a host filesystem at 98% capacity (3.0GB free) — confirmed
-independently by both the phase's executors (across three separate plan sessions) and by the
-verifier. Every static, structural, and unit-test check passed, including a code review that
-found and fixed two genuine blockers (CR-01, CR-02) and two warnings (WR-01, WR-02) in the start
-scripts and E2E specs — all four fixes independently re-confirmed in source by the verifier.
+  root_cause: "tests/docker-compose.test.yml's app service hardcodes a host port publish (8000:8000) that is not actually needed: Playwright reaches the app via the internal Compose network (BASE_URL=http://app:8000) and the healthcheck's curl runs inside the app container's own namespace. This unnecessary host publish collides with scripts/start_mac.sh's long-lived production container (docker run -d -p 8000:8000). tests/README.md's existing note names the right fix command (./scripts/stop_mac.sh) but misattributes the cause to docker/docker-compose.yml (documented as optional sugar) instead of scripts/start_mac.sh, and documents a manual workaround rather than isolation — which doesn't satisfy the UAT's actual expectation that the harness runs independently of an already-running production container."
+  artifacts:
+    - path: "tests/docker-compose.test.yml"
+      issue: "app service publishes unnecessary host port 8000:8000, colliding with any process already bound to host port 8000"
+    - path: "tests/README.md"
+      issue: "collision note misattributes the cause to docker/docker-compose.yml instead of scripts/start_mac.sh"
+  missing:
+    - "Drop (or remap to a non-default host port) the `ports:` mapping on tests/docker-compose.test.yml's app service"
+    - "Correct tests/README.md's causal explanation to name scripts/start_mac.sh as the actual collision source"
+  debug_session: .planning/debug/e2e-harness-port-conflict.md
