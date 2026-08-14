@@ -27,6 +27,124 @@ class TestMockMode:
         assert calls == []
 
 
+def _fleet_context(roster_ids: list[str], active_ids: list[str] | None = None) -> dict:
+    """Minimal fleet_context in build_fleet_context's shape (see app/chat/context.py)."""
+    active_ids = active_ids or []
+    return {
+        "remaining_kwh": 500.0,
+        "roster": [{"drone_id": drone_id} for drone_id in roster_ids],
+        "active_missions": [{"drone_id": drone_id} for drone_id in active_ids],
+    }
+
+
+class TestMockReplyDroneSelection:
+    """The mock must dispatch the drone the operator named, not a positional one.
+
+    Regression gate for the UAT defect where `mock_reply` keyword-matched
+    "launch"/"recall" but always substituted idle[0]/active[0], silently
+    dispatching a different drone than the message asked for.
+    """
+
+    def test_launch_uses_named_drone_not_first_idle(self):
+        context = _fleet_context(["FALCON-01", "FALCON-02", "FALCON-03"])
+
+        reply = llm.mock_reply(context, "Launch FALCON-03 to Riverside")
+
+        assert [mission.drone_id for mission in reply.missions] == ["FALCON-03"]
+        assert reply.missions[0].action == "launch"
+        assert "FALCON-03" in reply.message
+
+    def test_recall_uses_named_drone_not_first_active(self):
+        context = _fleet_context(
+            ["FALCON-01", "FALCON-02", "FALCON-03"], active_ids=["FALCON-01", "FALCON-03"]
+        )
+
+        reply = llm.mock_reply(context, "Recall FALCON-03")
+
+        assert [mission.drone_id for mission in reply.missions] == ["FALCON-03"]
+        assert reply.missions[0].action == "recall"
+
+    def test_named_drone_matched_case_insensitively_returns_roster_casing(self):
+        context = _fleet_context(["FALCON-01", "FALCON-02", "FALCON-05"])
+
+        reply = llm.mock_reply(context, "launch falcon-05 please")
+
+        assert reply.missions[0].drone_id == "FALCON-05"
+
+    def test_longest_matching_id_wins_over_its_own_prefix(self):
+        """FALCON-10 must not be read as FALCON-1 — the id-shape boundary."""
+        context = _fleet_context(["FALCON-1", "FALCON-10"])
+
+        reply = llm.mock_reply(context, "Launch FALCON-10 to Riverside")
+
+        assert reply.missions[0].drone_id == "FALCON-10"
+
+    def test_named_drone_is_honored_even_when_already_en_route(self):
+        """Pass the operator's choice through so the service layer can reject it
+        with an honest error, rather than silently substituting an idle drone."""
+        context = _fleet_context(["FALCON-01", "FALCON-02"], active_ids=["FALCON-02"])
+
+        reply = llm.mock_reply(context, "Launch FALCON-02 to Riverside")
+
+        assert reply.missions[0].drone_id == "FALCON-02"
+
+    def test_launch_without_a_named_drone_still_falls_back_to_first_idle(self):
+        """The E2E spec sends "Launch a drone" and depends on this fallback."""
+        context = _fleet_context(["FALCON-01", "FALCON-02"], active_ids=["FALCON-01"])
+
+        reply = llm.mock_reply(context, "Launch a drone")
+
+        assert reply.missions[0].drone_id == "FALCON-02"
+        assert reply.missions[0].zone == "Riverside"
+        assert reply.missions[0].distance_km == 4.0
+
+    def test_recall_without_a_named_drone_still_falls_back_to_first_active(self):
+        """The E2E spec sends "Recall the drone" and depends on this fallback."""
+        context = _fleet_context(["FALCON-01", "FALCON-02"], active_ids=["FALCON-02", "FALCON-01"])
+
+        reply = llm.mock_reply(context, "Recall the drone")
+
+        assert reply.missions[0].drone_id == "FALCON-02"
+        assert reply.missions[0].action == "recall"
+
+    def test_named_drone_is_honored_on_recall_with_nothing_en_route(self):
+        """The service layer answers "no active mission" — an error the operator
+        can act on, rather than the silent no-op the positional version gave."""
+        context = _fleet_context(["FALCON-01", "FALCON-03"])
+
+        reply = llm.mock_reply(context, "Recall FALCON-03")
+
+        assert reply.missions[0].drone_id == "FALCON-03"
+        assert reply.missions[0].action == "recall"
+
+    def test_recall_without_a_named_drone_and_nothing_en_route_takes_no_action(self):
+        reply = llm.mock_reply(_fleet_context(["FALCON-01"]), "Recall the drone")
+
+        assert reply.missions == []
+
+    def test_naming_a_drone_without_a_keyword_takes_no_action(self):
+        context = _fleet_context(["FALCON-01", "FALCON-03"])
+
+        reply = llm.mock_reply(context, "How is FALCON-03 doing?")
+
+        assert reply.missions == []
+        assert reply.message.startswith("[mock]")
+
+    def test_launch_with_an_empty_roster_takes_no_action(self):
+        reply = llm.mock_reply(_fleet_context([]), "Launch a drone")
+
+        assert reply.missions == []
+
+    def test_mock_prefix_is_preserved_on_every_reply(self):
+        """tests/specs/chat.spec.ts asserts on /^\\[mock\\]/ to prove the mocked
+        path ran rather than a real, billable model call."""
+        context = _fleet_context(["FALCON-01", "FALCON-02"], active_ids=["FALCON-02"])
+
+        assert llm.mock_reply(context, "Launch FALCON-01 to Riverside").message.startswith("[mock]")
+        assert llm.mock_reply(context, "Recall FALCON-02").message.startswith("[mock]")
+        assert llm.mock_reply(context, "status?").message.startswith("[mock]")
+
+
 class TestExtraBodyShape:
     """CHAT-08 regression gate: response_format and provider must be nested
 

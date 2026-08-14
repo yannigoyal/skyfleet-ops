@@ -76,6 +76,45 @@ class TestChatTurn:
         actions = json.loads(rows[1]["actions"])
         assert actions["missions"][0]["action"] == "launch"
 
+    async def test_mock_launch_dispatches_the_drone_the_operator_named(self, db, cache, mock_mode):
+        """UAT regression: the message names FALCON-03, which is not the first
+        idle roster drone. The mock used to substitute the roster-order default,
+        so the operator watched a drone they never asked for leave the pad."""
+        _seed_fleet_telemetry(cache)
+        client = _client(db, cache)
+
+        response = client.post("/api/chat", json={"message": "Launch FALCON-03 to Riverside"})
+
+        assert response.status_code == 200
+        body = response.json()
+        assert body["errors"] == []
+        assert [mission["drone_id"] for mission in body["missions"]] == ["FALCON-03"]
+
+        fleet_body = client.get("/api/fleet").json()
+        assert [mission["drone_id"] for mission in fleet_body["missions"]] == ["FALCON-03"]
+
+    async def test_mock_recall_targets_the_drone_the_operator_named(self, db, cache, mock_mode):
+        """The recall counterpart: two drones en route, and the message names
+        the second. Recalling active[0] would ground the wrong one."""
+        _seed_fleet_telemetry(cache)
+        client = _client(db, cache)
+        for drone_id in ("FALCON-01", "FALCON-03"):
+            launch = client.post(
+                "/api/fleet/missions",
+                json={"drone_id": drone_id, "zone": "Riverside", "distance_km": 4.0},
+            )
+            assert launch.status_code == 201
+
+        response = client.post("/api/chat", json={"message": "Recall FALCON-03"})
+
+        assert response.status_code == 200
+        body = response.json()
+        assert body["errors"] == []
+        assert [mission["drone_id"] for mission in body["missions"]] == ["FALCON-03"]
+
+        fleet_body = client.get("/api/fleet").json()
+        assert [mission["drone_id"] for mission in fleet_body["missions"]] == ["FALCON-01"]
+
     async def test_informational_message_executes_nothing(self, db, cache, mock_mode):
         _seed_fleet_telemetry(cache)
         client = _client(db, cache)

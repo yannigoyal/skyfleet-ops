@@ -146,39 +146,70 @@ def build_messages(fleet_context: dict, history: list[ChatMessage], user_message
     return messages
 
 
+def _named_drone_id(fleet_context: dict, text: str) -> str | None:
+    """The drone id the operator named, or None if the message names no known drone.
+
+    `text` is the already-lowercased message. Matching is case-insensitive and
+    tries the longest id first, so "FALCON-10" is never read as the "FALCON-1"
+    that is a prefix of it. Only ids the fleet already knows about are matched:
+    a bare hyphen-digit pattern would also catch zone names like "Riverside-5",
+    and the roster puts no format constraint on drone ids. A drone the fleet has
+    never heard of therefore falls through to the positional default below — a
+    known limit of the mock, not of the real model path.
+    """
+    known = {drone["drone_id"] for drone in fleet_context.get("roster", [])}
+    known.update(mission["drone_id"] for mission in fleet_context.get("active_missions", []))
+    for drone_id in sorted(known, key=len, reverse=True):
+        if drone_id.lower() in text:
+            return drone_id
+    return None
+
+
 def mock_reply(fleet_context: dict, user_message: str) -> FlightDirectorReply:
     """Deterministic stand-in for the model, used when LLM_MOCK=true.
 
-    Recognizes two keywords so E2E tests can exercise auto-execution:
-    "recall" recalls the first active mission, "launch" launches the first
-    idle roster drone to zone "Riverside" over 4.0 km. Anything else returns
-    a plain status summary with no actions.
+    Recognizes two keywords so E2E tests can exercise auto-execution: "recall"
+    recalls a mission, "launch" launches a drone to zone "Riverside" over 4.0 km.
+    Anything else returns a plain status summary with no actions.
+
+    The drone acted on is the one the message names, matched against the fleet's
+    known ids; only when the message names no known drone does the mock fall back
+    to a positional default (first idle drone for a launch, first active mission
+    for a recall) so keyword-only prompts like "Launch a drone" keep working.
+
+    A named drone is passed through even when it is ineligible — already en route
+    for a launch, or not flying for a recall. The service layer then rejects it
+    with a real error the operator can read, which is the honest outcome; quietly
+    swapping in an eligible drone would dispatch one the operator never asked for.
     """
     text = user_message.lower()
     remaining = fleet_context.get("remaining_kwh")
     roster = fleet_context.get("roster", [])
     active = fleet_context.get("active_missions", [])
+    named = _named_drone_id(fleet_context, text)
     summary = (
         f"[mock] {len(roster)} drones on roster, {len(active)} en route, "
         f"{remaining} kWh remaining."
     )
 
-    if "recall" in text and active:
-        drone_id = active[0]["drone_id"]
-        return FlightDirectorReply(
-            message=f"{summary} Recalling {drone_id}.",
-            missions=[MissionAction(drone_id=drone_id, action="recall")],
-        )
+    if "recall" in text:
+        drone_id = named or (active[0]["drone_id"] if active else None)
+        if drone_id:
+            return FlightDirectorReply(
+                message=f"{summary} Recalling {drone_id}.",
+                missions=[MissionAction(drone_id=drone_id, action="recall")],
+            )
 
     if "launch" in text:
         busy = {mission["drone_id"] for mission in active}
         idle = [drone["drone_id"] for drone in roster if drone["drone_id"] not in busy]
-        if idle:
+        drone_id = named or (idle[0] if idle else None)
+        if drone_id:
             return FlightDirectorReply(
-                message=f"{summary} Launching {idle[0]} to Riverside.",
+                message=f"{summary} Launching {drone_id} to Riverside.",
                 missions=[
                     MissionAction(
-                        drone_id=idle[0], action="launch", zone="Riverside", distance_km=4.0
+                        drone_id=drone_id, action="launch", zone="Riverside", distance_km=4.0
                     )
                 ],
             )
