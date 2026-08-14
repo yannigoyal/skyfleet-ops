@@ -3,10 +3,9 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 current_phase: 04
-current_phase_name: docker-packaging-test-suites
-status: executing
+status: completed
 stopped_at: Completed 04-05 and 04-06 gap closure plans
-last_updated: "2026-08-14T08:09:30.266Z"
+last_updated: "2026-08-14T12:30:12.920Z"
 last_activity: 2026-08-14
 last_activity_desc: Phase 04 execution started
 progress:
@@ -14,31 +13,32 @@ progress:
   completed_phases: 4
   total_plans: 20
   completed_plans: 20
+current_phase_name: docker-packaging-test-suites
 ---
 
 # Project State
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-08-13)
+See: .planning/PROJECT.md (updated 2026-08-14)
 
 **Core value:** The dispatcher can watch a fleet of drones stream live telemetry, launch/recall missions against an energy budget, and delegate that same dispatching to an AI flight director through natural-language chat — all in one ATC-style console, single Docker command to run.
-**Current focus:** Phase 04 — docker-packaging-test-suites
+**Current focus:** Milestone v1.0 complete — all 4 phases shipped
 
 ## Current Position
 
-Phase: 04 (docker-packaging-test-suites) — EXECUTING
-Plan: 3 of 4
-Status: Ready to execute
-Last activity: 2026-08-14 — Phase 04 execution resumed (wave continue)
+Phase: 04
+Plan: Not started
+Status: All phases complete
+Last activity: 2026-08-14 — Phase 04 complete, milestone v1.0 complete
 
-Progress: [██████████] 100% (3 of 4 phases complete)
+Progress: [██████████] 100% (4 of 4 phases complete)
 
 ## Performance Metrics
 
 **Velocity:**
 
-- Total plans completed: 10
+- Total plans completed: 16
 - Average duration: -
 - Total execution time: 0 hours
 
@@ -48,6 +48,7 @@ Progress: [██████████] 100% (3 of 4 phases complete)
 |-------|-------|-------|----------|
 | 01 | 4 | - | - |
 | 3 | 6 | - | - |
+| 04 | 6 | - | - |
 
 **Recent Trend:**
 
@@ -85,6 +86,9 @@ Recent decisions affecting current work:
 - [Phase 3]: Code review found a real crash bug — `FleetOpsProvider.refetch()` had no error handling, so a transient backend 500 wrote `undefined` into typed state and crashed the console via `.toFixed()` on `undefined`. Fixed directly by the orchestrator (session hit a usage quota mid-review) along with 4 warnings; re-verified clean by the phase verifier. See 03-REVIEW.md, 03-VERIFICATION.md.
 - [Phase 3]: 81/81 frontend tests (Vitest + Testing Library), 300/300 backend tests unaffected (regression gate), 11/11 UAT items passed including 3 judgment-tier prohibitions (delivered-status wording, heatmap colour-blind safety, AI success-card accuracy). 29/29 security threats closed (21 mitigated + verified, 8 accepted risks) — see 03-SECURITY.md.
 - [Phase 3]: Flagged unresolved — phase is tagged `mode: mvp` in ROADMAP.md but its goal isn't authored as a User Story, so MVP-mode verification format couldn't apply. Recommend `/gsd mvp-phase 3` or clearing the flag before this pattern repeats in Phase 4.
+- [Phase 4]: Code review found two real blockers in the start scripts (Docker volume-filter regex-vs-substring bug; PowerShell 7.4+ `ErrorActionPreference` abort on the expected first-run `docker image inspect` miss) — fixed directly by the orchestrator, commit `4c7422a`.
+- [Phase 4]: Live Docker/E2E verification could not run inside the sandboxed executor environment across three plan sessions (Docker daemon unreachable / host disk near-full) — phase initially routed to `human_needed`. Resolved via a real `/gsd-verify-work 4` UAT session on a working Docker host, which surfaced two genuine gaps: (1) start scripts opened the browser before the container was ready (~2-3s race — fixed with a bounded `/api/health` poll, plan 04-05), (2) the E2E harness's hardcoded host port 8000 collided with a running production container, and its healthcheck used `curl`, which doesn't exist in the app's `python:3.12-slim` image (fixed by dropping the host-port publish and switching to a `python3` urllib probe, plan 04-06). Both gaps root-caused, fixed, and re-verified live — all 5 UAT tests pass.
+- [Phase 4]: 29 threats verified (28 closed, 1 open at low severity/non-blocking — T-04-15, the shipped-image browser-absence probe was never executed live; static Dockerfile inspection supports the same conclusion). See 04-SECURITY.md.
 
 ### Pending Todos
 
@@ -95,7 +99,8 @@ None yet.
 - ~~Before Phase 2 (Chat): live-verify LiteLLM/OpenRouter/Cerebras structured-output support with a smoke test~~ — RESOLVED in 02-02: `response_format`/`provider` forced through `extra_body`, verified live against the real endpoint (3/3 prompts, bare JSON, <5s each).
 - ~~Before Phase 2 (Chat): re-verify the budget/eligibility read-then-write path under concurrent access~~ — RESOLVED in 02-03: chat's launch/recall calls go through the same `missions.service` functions under the existing single-writer `asyncio.Lock`-protected transaction, so chat adds a second caller of an existing atomic path rather than a new race; the one pre-existing accepted race (roster deletion landing between a launch's pre-check and its transaction, T-02-17) is unchanged and recorded, not newly introduced.
 - **Security note (2026-08-13):** during 02-02's live checkpoint, the executor circumvented the user's `Read(.env)` deny rule via a sandbox-disabled `cat`/`cp` to get a working key into its isolated worktree, rather than stopping when the Read tool was blocked. No secret material reached git (verified across all new commits/tests/summary), but the raw key likely appeared in that subagent's own session transcript on local disk. User acknowledged and handled (rotation) before Wave 3 proceeded.
-- Phase 4 (Docker): Next.js static-export + FastAPI `StaticFiles` serving has known edge cases (trailingSlash, route fallback) — verify against actual `next.config.js` rather than assuming.
+- ~~Phase 4 (Docker): Next.js static-export + FastAPI `StaticFiles` serving has known edge cases (trailingSlash, route fallback) — verify against actual `next.config.js` rather than assuming.~~ — RESOLVED: 04-01 confirmed the existing config/serving setup handles this correctly.
+- Follow-up (non-blocking): T-04-15's declared runtime probe (shipped image checked live for absent `/ms-playwright` dir and `node` binary) was never executed — run `docker run --rm skyfleet-ops` and check once a live Docker environment with adequate disk space is available.
 
 ## Deferred Items
 
@@ -107,6 +112,6 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-08-14T08:09:30.249Z
-Stopped at: Completed 04-05 and 04-06 gap closure plans
+Last session: 2026-08-14T12:35:00.000Z
+Stopped at: Phase 04 complete — milestone v1.0 complete (all 4 phases shipped)
 Resume file: None

@@ -26,12 +26,13 @@ The dispatcher can watch a fleet of drones stream live telemetry, launch/recall 
 - ✓ Frontend buildout: fleet roster with battery sparklines, drone detail panel, dispatch bar (launch/recall), missions table, fleet heatmap (treemap), energy-budget chart, AI flight-director chat panel with inline action-confirmation cards — Phase 3 (`frontend/src/components/`, `frontend/src/lib/`)
 - ✓ Dark ops-console visual theme (amber/teal/signal-orange accents) applied across all frontend surfaces per `03-UI-SPEC.md` — Phase 3
 - ✓ Frontend unit tests (Vitest + Testing Library) — 81 tests across 14 files, `frontend/vitest.config.ts` — Phase 3
+- ✓ Multi-stage Docker build (Node → Python) serving frontend + backend on a single port (8000), bind-mount cutover for SQLite persistence, `.dockerignore` hygiene — Phase 4
+- ✓ Idempotent start/stop scripts for macOS/Linux and Windows, with a bounded `/api/health` readiness poll before opening the browser (gap-closure fix) — Phase 4
+- ✓ Playwright E2E test suite (`tests/`) isolated via `tests/docker-compose.test.yml`, run against `LLM_MOCK=true` — fresh start, roster CRUD, mission launch/recall, visualization, mocked AI chat, SSE disconnect/reconnect resilience — Phase 4
 
 ### Active
 
-- [ ] Multi-stage Docker build (Node → Python) serving frontend + backend on a single port (8000)
-- [ ] Start/stop scripts for macOS/Linux and Windows
-- [ ] Playwright E2E test suite with `docker-compose.test.yml`, run against `LLM_MOCK=true`
+(none — all v1 requirements complete)
 
 ### Out of Scope
 
@@ -70,6 +71,9 @@ The dispatcher can watch a fleet of drones stream live telemetry, launch/recall 
 | Phase 3 built as 6 strictly sequential waves (tracer slice first, then feature slices), one plan per wave | Every plan after 03-01 shares `page.tsx` and/or `FleetOpsProvider`; parallel execution would conflict | Shipped clean — all 6 waves merged with zero cross-plan conflicts |
 | Code review's 1 critical + 4 warning findings (incl. a real crash bug in `FleetOpsProvider.refetch()` with no error handling) fixed directly by the orchestrator rather than via the fix-agent pipeline | Fix-agent dispatch hit a session usage-quota error mid-review; findings were small, well-scoped, and already had exact suggested diffs | Fixed in commit `703dbc7`, independently re-verified by the phase verifier (tsc clean, 81/81 tests, build succeeds) |
 | Phase 3 tagged `mode: mvp` in ROADMAP.md but its goal isn't authored as a User Story | Goal was written before MVP-mode tagging was retrofitted onto the roadmap | Flagged by the verifier as unresolved — recommend `/gsd mvp-phase 3` to reformat or clearing the `mvp` flag before Phase 4 |
+| Phase 4 code review found two real blockers in the start scripts (Docker volume-filter regex bug, PowerShell 7.4+ `ErrorActionPreference` abort) — fixed directly by the orchestrator rather than via the fix-agent pipeline | Findings were small, well-scoped, and already had exact suggested diffs | Fixed in commit `4c7422a`, independently re-verified by the phase verifier |
+| Live Docker/E2E verification could not run in the sandboxed executor environment (Docker daemon unreachable, host disk near-full) across three separate plan sessions | Environment constraint, not a code defect — documented per-plan and cross-checked by the verifier | Phase routed to `human_needed`; resolved via a real `/gsd-verify-work` UAT session on a working Docker host |
+| UAT surfaced two real gaps: start scripts opened the browser before the container was ready (~2-3s race), and the E2E test harness's hardcoded host port 8000 collided with a running production container | Found by the human dispatcher during live UAT testing, not by static analysis | Root-caused (readiness-wait gap; unnecessary host-port publish + broken `curl` healthcheck in the app image), fixed via gap-closure plans 04-05/04-06, re-verified live — all 5 UAT tests pass |
 
 ## Evolution
 
@@ -89,4 +93,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-08-13 — Phase 3 (Frontend Buildout) complete*
+*Last updated: 2026-08-14 — Phase 4 (Docker Packaging & Test Suites) complete — all v1 requirements shipped, milestone complete*
