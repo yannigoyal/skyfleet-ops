@@ -11,7 +11,9 @@ docker compose -f docker-compose.test.yml up --build --abort-on-container-exit
 
 This builds the app image from `../docker/Dockerfile`, starts it with `LLM_MOCK=true`, and runs the Playwright suite against it in a separate container — keeping browser dependencies out of the production image.
 
-**Before running:** stop any dev container first (`./scripts/stop_mac.sh` or `./scripts/stop_windows.ps1`) — the test compose file publishes the same host port (8000) as the production `docker/docker-compose.yml`, and the two will conflict if both try to bind it.
+**No pre-flight needed.** The harness publishes no host port, so it runs alongside a console you already started with `scripts/start_mac.sh` — there is nothing to stop first. Playwright reaches the app over the private Compose network via `BASE_URL=http://app:8000`, and the app's healthcheck curls itself from inside its own container, so neither path ever needs a host mapping.
+
+Earlier versions of this file did publish `8000:8000`, which collided with the detached `docker run -d -p 8000:8000` that `scripts/start_mac.sh` leaves bound indefinitely. That script is the documented single-command launch path (`planning/PLAN.md` section 11) and was the real source of the conflict — not the optional `docker/docker-compose.yml` convenience wrapper, which most operators never invoke. To reach the test app from a host browser while debugging, add a mapping to an unused host port locally, e.g. `ports: ["8001:8000"]`.
 
 ## Specs
 
