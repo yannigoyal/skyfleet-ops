@@ -1,0 +1,29 @@
+# --- Environment & secrets ---
+.env
+.env.local
+
+# --- Git & GSD planning ---
+.git
+.gitignore
+.planning
+.claude
+
+# --- Database (runtime data) ---
+database/*.db*
+
+# --- Node / Next.js ---
+**/node_modules
+frontend/.next
+frontend/out
+
+# --- Python ---
+backend/.venv
+**/__pycache__
+**/*.pyc
+**/.pytest_cache
+**/.ruff_cache
+
+# --- Testing ---
+tests/node_modules
+tests/test-results
+tests/playwright-report

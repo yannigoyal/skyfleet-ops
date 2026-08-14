@@ -30,6 +30,8 @@ yarn-error.log*
 # --- Database (runtime data) ---
 database/*.db
 database/*.db-journal
+database/*.db-wal
+database/*.db-shm
 database/*.sqlite3
 !database/.gitkeep
 
