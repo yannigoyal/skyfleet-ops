@@ -55,8 +55,8 @@ Requirements for this milestone (the entire remaining scope of PLAN.md). Databas
 - [x] **TEST-01**: Backend unit tests (pytest) cover roster service/repository/router logic
 - [x] **TEST-02**: Backend unit tests cover chat/LLM structured-output parsing, malformed-response handling, and mission/roster validation within the chat flow
 - [x] **TEST-03**: Frontend unit tests (React Testing Library or similar) cover the new components: detail panel, heatmap, budget chart, missions table, dispatch bar, chat panel
-- [ ] **TEST-04**: Playwright E2E suite (run with `LLM_MOCK=true`) covers: fresh start with default roster/budget, roster add/remove, mission launch/recall with budget updates, visualization rendering, AI chat mocked flow, and SSE disconnect/reconnect resilience
-- [ ] **TEST-05**: `tests/docker-compose.test.yml` spins up the app container plus a Playwright container, keeping browser dependencies out of the production image
+- [x] **TEST-04**: Playwright E2E suite (run with `LLM_MOCK=true`) covers: fresh start with default roster/budget, roster add/remove, mission launch/recall with budget updates, visualization rendering, AI chat mocked flow, and SSE disconnect/reconnect resilience
+- [x] **TEST-05**: `tests/docker-compose.test.yml` spins up the app container plus a Playwright container, keeping browser dependencies out of the production image
 
 ## v2 Requirements
 
@@ -111,8 +111,8 @@ Deferred — not part of this milestone.
 | TEST-01 | Phase 4 | Complete |
 | TEST-02 | Phase 4 | Complete |
 | TEST-03 | Phase 4 | Complete |
-| TEST-04 | Phase 4 | Pending |
-| TEST-05 | Phase 4 | Pending |
+| TEST-04 | Phase 4 | Complete |
+| TEST-05 | Phase 4 | Complete |
 
 **Coverage:**
 
