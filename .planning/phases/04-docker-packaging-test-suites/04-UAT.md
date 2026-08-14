@@ -1,20 +1,14 @@
 ---
-status: testing
+status: partial
 phase: 04-docker-packaging-test-suites
 source: [04-VERIFICATION.md]
 started: 2026-08-14T06:57:12Z
-updated: 2026-08-14T06:57:12Z
+updated: 2026-08-14T07:20:00Z
 ---
 
 ## Current Test
 
-number: 1
-name: Live Docker build + bind-mount/restart-persistence proof
-expected: |
-  Container builds and serves both frontend and API on port 8000; bind mount type is `bind`
-  sourced from the repo's database/ dir; roster identical across restart; database/skyfleet.db
-  mtime advances.
-awaiting: user response
+[testing complete]
 
 ## Tests
 
@@ -23,7 +17,7 @@ expected: |
   Run `./scripts/start_mac.sh --build`, then `docker inspect skyfleet-ops` for a bind mount at
   /app/database, then curl / and /api/health (both 200), then `docker restart skyfleet-ops` and
   confirm `GET /api/roster` returns the same drones before/after.
-result: [pending]
+result: pass
 
 ### 2. Live start/stop script idempotency (bash + PowerShell)
 expected: |
@@ -33,7 +27,9 @@ expected: |
   at runtime. Exactly one container after two start calls; both stop calls exit 0; the
   leftover-skyfleet-data-volume notice fires when the volume exists; start_windows.ps1 does not
   abort on a fresh install under PowerShell 7.4+.
-result: [pending]
+result: issue
+reported: "after starting the script it takes 2 3 second to load in the meantime the screen shows page is not working"
+severity: major
 
 ### 3. Full Playwright E2E harness run (twice, back-to-back)
 expected: |
@@ -42,7 +38,9 @@ expected: |
   seven specs (health, fresh-start, roster, missions, visualization, chat, sse-resilience). All
   seven specs pass both runs; the suite demonstrates idempotency; `docker run --rm skyfleet-ops`
   shows no `/ms-playwright` directory and no `node` binary (TEST-05 image-isolation proof).
-result: [pending]
+result: issue
+reported: "failed to set up container networking: driver failed programming external connectivity on endpoint tests-app-1 (f1013b8e38c1b8c82f9dfba6539d60a014b9db70d6a4275f9b7713522f517c12): Bind for 0.0.0.0:8000 failed: port is already allocated"
+severity: blocker
 
 ### 4. SSE reconnect behavior (state-transition invariant)
 expected: |
@@ -50,7 +48,7 @@ expected: |
   confirm the connection indicator turns red/Disconnected; restore it and confirm the indicator
   returns to Live on its own, without a page reload — via the client's native EventSource retry,
   not a fresh page load standing in for reconnection.
-result: [pending]
+result: pass
 
 ### 5. Judgment-tier prohibitions sign-off
 expected: |
@@ -59,20 +57,38 @@ expected: |
   its target behavior removed) and confirm they hold in practice, not just by design. The
   verifier's non-authoritative LLM-judge assessment found all four plausible-to-strongly-
   supported; final sign-off belongs to a human.
-result: [pending]
+result: pass
 
 ## Summary
 
 total: 5
-passed: 0
-issues: 0
-pending: 5
+passed: 3
+issues: 2
+pending: 0
 skipped: 0
 blocked: 0
 
 ## Gaps
 
-None found at the code level. All gaps are live-execution evidence gaps caused by this sandbox
+- gap_id: G-04-2
+  truth: "Container builds and starts serving immediately after the start script opens the browser; no unresponsive-page state on first load."
+  status: failed
+  reason: "User reported: after starting the script it takes 2 3 second to load in the meantime the screen shows page is not working"
+  severity: major
+  test: 2
+  artifacts: []
+  missing: []
+
+- gap_id: G-04-3
+  truth: "The E2E test harness (tests/docker-compose.test.yml) starts its app service on port 8000 without conflicting with a production container already running on the same host port."
+  status: failed
+  reason: "User reported: failed to set up container networking: driver failed programming external connectivity on endpoint tests-app-1: Bind for 0.0.0.0:8000 failed: port is already allocated"
+  severity: blocker
+  test: 3
+  artifacts: []
+  missing: []
+
+None found at the code level (prior to this session's UAT). All gaps are live-execution evidence gaps caused by this sandbox
 having no reachable Docker daemon and a host filesystem at 98% capacity (3.0GB free) — confirmed
 independently by both the phase's executors (across three separate plan sessions) and by the
 verifier. Every static, structural, and unit-test check passed, including a code review that
