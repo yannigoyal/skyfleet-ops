@@ -149,13 +149,13 @@ panels into `frontend/src/app/page.tsx` and no two plans can own that file in th
   4. Backend and frontend unit test suites pass, covering roster service/repository/router logic, chat/LLM structured-output parsing and validation delegation, and the new frontend components
   5. A Playwright E2E suite, isolated via `tests/docker-compose.test.yml` and run with `LLM_MOCK=true`, passes covering fresh start, roster add/remove, mission launch/recall with budget updates, visualization rendering, mocked AI chat, and SSE disconnect/reconnect resilience
 
-**Plans:** 4 plans
+**Plans:** 2/4 plans executed
 
 Plans:
 **Wave 1**
 
-- [ ] 04-01-PLAN.md — Tracer: bind-mount Docker packaging proven through build, serve, and restart; build-context hygiene; Windows script parity
-- [ ] 04-02-PLAN.md — Audit the existing pytest and Vitest suites against TEST-01/02/03's exact wording, gap-fill only where uncovered
+- [x] 04-01-PLAN.md — Tracer: bind-mount Docker packaging proven through build, serve, and restart; build-context hygiene; Windows script parity
+- [x] 04-02-PLAN.md — Audit the existing pytest and Vitest suites against TEST-01/02/03's exact wording, gap-fill only where uncovered
 
 **Wave 2** *(blocked on Wave 1 completion)*
 
@@ -175,4 +175,4 @@ Phases execute in numeric order: 1 → 2 → 3 → 4
 | 1. Roster Module | 4/4 | Complete    | 2026-08-12 |
 | 2. AI Flight Director Chat | 4/4 | Complete    | 2026-08-13 |
 | 3. Frontend Buildout | 6/6 | Complete    | 2026-08-13 |
-| 4. Docker Packaging & Test Suites | 0/TBD | Not started | - |
+| 4. Docker Packaging & Test Suites | 2/4 | In Progress|  |
