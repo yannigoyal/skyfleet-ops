@@ -149,7 +149,7 @@ panels into `frontend/src/app/page.tsx` and no two plans can own that file in th
   4. Backend and frontend unit test suites pass, covering roster service/repository/router logic, chat/LLM structured-output parsing and validation delegation, and the new frontend components
   5. A Playwright E2E suite, isolated via `tests/docker-compose.test.yml` and run with `LLM_MOCK=true`, passes covering fresh start, roster add/remove, mission launch/recall with budget updates, visualization rendering, mocked AI chat, and SSE disconnect/reconnect resilience
 
-**Plans:** 6 plans (4 executed + 2 gap closure)
+**Plans:** 5/6 plans executed (4 executed + 2 gap closure)
 
 Plans:
 **Wave 1**
@@ -167,7 +167,7 @@ Plans:
 
 **Gap closure** *(from 04-UAT.md — run via `/gsd-execute-phase 4 --gaps-only`; both plans are Wave 1 and share no files, so they run in parallel)*
 
-- [ ] 04-05-PLAN.md — G-04-2: bounded `/api/health` readiness poll between container start and browser open in both start scripts, so the first page load is never a connection-refused error (DEPLOY-02, DEPLOY-03)
+- [x] 04-05-PLAN.md — G-04-2: bounded `/api/health` readiness poll between container start and browser open in both start scripts, so the first page load is never a connection-refused error (DEPLOY-02, DEPLOY-03)
 - [ ] 04-06-PLAN.md — G-04-3: drop the E2E harness's unnecessary host port publish so it runs independently of a production container on port 8000, and correct the README's causal attribution (TEST-04, TEST-05)
 
 ## Progress
@@ -180,4 +180,4 @@ Phases execute in numeric order: 1 → 2 → 3 → 4
 | 1. Roster Module | 4/4 | Complete    | 2026-08-12 |
 | 2. AI Flight Director Chat | 4/4 | Complete    | 2026-08-13 |
 | 3. Frontend Buildout | 6/6 | Complete    | 2026-08-13 |
-| 4. Docker Packaging & Test Suites | 4/4 | In Progress|  |
+| 4. Docker Packaging & Test Suites | 5/6 | In Progress|  |
