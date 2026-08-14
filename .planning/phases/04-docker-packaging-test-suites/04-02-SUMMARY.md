@@ -171,3 +171,9 @@ None - no external service configuration required.
 ---
 *Phase: 04-docker-packaging-test-suites*
 *Completed: 2026-08-14*
+
+## Self-Check: PASSED
+
+- FOUND: `.planning/phases/04-docker-packaging-test-suites/deferred-items.md`
+- FOUND: commit `82ee9f7` (deferred-items.md)
+- FOUND: commit `e18605b` (this SUMMARY.md, verified after commit)
