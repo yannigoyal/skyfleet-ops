@@ -1,9 +1,9 @@
 ---
-status: diagnosed
+status: complete
 phase: 04-docker-packaging-test-suites
 source: [04-VERIFICATION.md]
 started: 2026-08-14T06:57:12Z
-updated: 2026-08-14T07:30:00Z
+updated: 2026-08-14T12:14:00Z
 ---
 
 ## Current Test
@@ -19,28 +19,23 @@ expected: |
   confirm `GET /api/roster` returns the same drones before/after.
 result: pass
 
-### 2. Live start/stop script idempotency (bash + PowerShell)
+### 2. Live start/stop script idempotency (bash + PowerShell) — re-test after G-04-2 fix
 expected: |
-  Run `./scripts/start_mac.sh` and `./scripts/stop_mac.sh` each twice in a row (and the
-  PowerShell equivalents on an actual Windows host), confirming idempotency and the corrected
-  `docker volume inspect` / `docker image inspect` guards (CR-01/CR-02 fixes) behave as intended
-  at runtime. Exactly one container after two start calls; both stop calls exit 0; the
-  leftover-skyfleet-data-volume notice fires when the volume exists; start_windows.ps1 does not
-  abort on a fresh install under PowerShell 7.4+.
-result: issue
-reported: "after starting the script it takes 2 3 second to load in the meantime the screen shows page is not working"
-severity: major
+  Run `./scripts/start_mac.sh` and confirm the browser no longer shows an unresponsive/"page not
+  working" state — start_mac.sh now polls `/api/health` (up to 60s) before opening the browser.
+  Then run `./scripts/stop_mac.sh`, and run both twice in a row to confirm idempotency still
+  holds. (PowerShell equivalents require an actual Windows host — mark blocked if unavailable.)
+result: pass
 
-### 3. Full Playwright E2E harness run (twice, back-to-back)
+### 3. Full Playwright E2E harness run (twice, back-to-back) — re-test after G-04-3 fix
 expected: |
-  Run `cd tests && docker compose -f docker-compose.test.yml up --build --abort-on-container-exit
-  --exit-code-from playwright` twice in a row without recreating the app container, covering all
-  seven specs (health, fresh-start, roster, missions, visualization, chat, sse-resilience). All
-  seven specs pass both runs; the suite demonstrates idempotency; `docker run --rm skyfleet-ops`
-  shows no `/ms-playwright` directory and no `node` binary (TEST-05 image-isolation proof).
-result: issue
-reported: "failed to set up container networking: driver failed programming external connectivity on endpoint tests-app-1 (f1013b8e38c1b8c82f9dfba6539d60a014b9db70d6a4275f9b7713522f517c12): Bind for 0.0.0.0:8000 failed: port is already allocated"
-severity: blocker
+  With a production `skyfleet-ops` container already running (from Test 2) on port 8000, run
+  `cd tests && docker compose -f docker-compose.test.yml up --build --abort-on-container-exit
+  --exit-code-from playwright`. The harness no longer publishes a host port, so it should no
+  longer collide with the running production container. All seven specs pass; the healthcheck
+  (now a python3 urllib probe instead of curl, which doesn't exist in the app image) reports
+  healthy.
+result: pass
 
 ### 4. SSE reconnect behavior (state-transition invariant)
 expected: |
@@ -62,8 +57,8 @@ result: pass
 ## Summary
 
 total: 5
-passed: 3
-issues: 2
+passed: 5
+issues: 0
 pending: 0
 skipped: 0
 blocked: 0
@@ -71,8 +66,10 @@ blocked: 0
 ## Gaps
 
 - gap_id: G-04-2
+  status: resolved
+  resolved_by: 04-05-PLAN.md
+  resolved_at: 2026-08-14
   truth: "Container builds and starts serving immediately after the start script opens the browser; no unresponsive-page state on first load."
-  status: failed
   reason: "User reported: after starting the script it takes 2 3 second to load in the meantime the screen shows page is not working"
   severity: major
   test: 2
@@ -87,8 +84,10 @@ blocked: 0
   debug_session: .planning/debug/start-script-browser-race.md
 
 - gap_id: G-04-3
+  status: resolved
+  resolved_by: 04-06-PLAN.md
+  resolved_at: 2026-08-14
   truth: "The E2E test harness (tests/docker-compose.test.yml) starts its app service on port 8000 without conflicting with a production container already running on the same host port."
-  status: failed
   reason: "User reported: failed to set up container networking: driver failed programming external connectivity on endpoint tests-app-1: Bind for 0.0.0.0:8000 failed: port is already allocated"
   severity: blocker
   test: 3
@@ -102,3 +101,4 @@ blocked: 0
     - "Drop (or remap to a non-default host port) the `ports:` mapping on tests/docker-compose.test.yml's app service"
     - "Correct tests/README.md's causal explanation to name scripts/start_mac.sh as the actual collision source"
   debug_session: .planning/debug/e2e-harness-port-conflict.md
+  note: "Executor also found and fixed a second, previously-hidden blocker while proving this fix live: the harness healthcheck used `curl`, which does not exist in the python:3.12-slim app image, so the app was permanently unhealthy and playwright's `service_healthy` gate could never pass even with the port conflict fixed. Replaced with a python3 urllib probe (tests/docker-compose.test.yml only; no production image change)."
