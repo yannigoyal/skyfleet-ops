@@ -27,13 +27,25 @@ if ($Existing) {
     docker rm -f $ContainerName | Out-Null
 }
 
+New-Item -ItemType Directory -Force -Path "$RootDir\database" | Out-Null
+
 Write-Host "Starting $ContainerName on port $Port..."
 docker run -d `
   --name $ContainerName `
-  -v skyfleet-data:/app/database `
+  -v "${RootDir}\database:/app/database" `
   -p "${Port}:8000" `
   --env-file .env `
   $ImageName
 
 Write-Host "SkyFleet Ops is running at http://localhost:$Port"
+
+$OldVolume = docker volume ls -q -f name=^skyfleet-data$
+if ($OldVolume) {
+    Write-Host ""
+    Write-Host "Note: a previous Docker-managed volume 'skyfleet-data' still exists."
+    Write-Host "This container now reads and writes database\skyfleet.db on the host instead."
+    Write-Host "See docker/MIGRATION.md if you need to recover data from the old volume."
+    Write-Host ""
+}
+
 Start-Process "http://localhost:$Port"

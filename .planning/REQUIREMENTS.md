@@ -45,10 +45,10 @@ Requirements for this milestone (the entire remaining scope of PLAN.md). Databas
 
 ### Deployment
 
-- [ ] **DEPLOY-01**: Multi-stage Dockerfile builds the Next.js static export and Python backend into a single image serving both on port 8000
-- [ ] **DEPLOY-02**: `scripts/start_mac.sh` / `scripts/stop_mac.sh` are idempotent and build/run/stop the container with the volume mount and `.env` file
-- [ ] **DEPLOY-03**: `scripts/start_windows.ps1` / `scripts/stop_windows.ps1` are idempotent PowerShell equivalents
-- [ ] **DEPLOY-04**: SQLite database persists across container restarts via the `database/` bind mount
+- [x] **DEPLOY-01**: Multi-stage Dockerfile builds the Next.js static export and Python backend into a single image serving both on port 8000
+- [x] **DEPLOY-02**: `scripts/start_mac.sh` / `scripts/stop_mac.sh` are idempotent and build/run/stop the container with the volume mount and `.env` file
+- [x] **DEPLOY-03**: `scripts/start_windows.ps1` / `scripts/stop_windows.ps1` are idempotent PowerShell equivalents
+- [x] **DEPLOY-04**: SQLite database persists across container restarts via the `database/` bind mount
 
 ### Testing
 
@@ -104,10 +104,10 @@ Deferred — not part of this milestone.
 | FE-07 | Phase 3 | Complete |
 | FE-08 | Phase 3 | Complete |
 | FE-09 | Phase 3 | Complete |
-| DEPLOY-01 | Phase 4 | Pending |
-| DEPLOY-02 | Phase 4 | Pending |
-| DEPLOY-03 | Phase 4 | Pending |
-| DEPLOY-04 | Phase 4 | Pending |
+| DEPLOY-01 | Phase 4 | Complete |
+| DEPLOY-02 | Phase 4 | Complete |
+| DEPLOY-03 | Phase 4 | Complete |
+| DEPLOY-04 | Phase 4 | Complete |
 | TEST-01 | Phase 4 | Complete |
 | TEST-02 | Phase 4 | Complete |
 | TEST-03 | Phase 4 | Complete |
