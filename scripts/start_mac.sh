@@ -39,6 +39,19 @@ docker run -d \
   --env-file .env \
   "$IMAGE_NAME"
 
+# `docker run -d` returns once the container process exists, not once uvicorn is
+# accepting connections. Without this wait the browser opens into the boot window
+# and shows a connection error for the first few seconds.
+echo "Waiting for SkyFleet Ops to answer on http://localhost:${PORT}/api/health ..."
+READY=0
+"$ROOT_DIR/scripts/wait_for_health.sh" "http://localhost:${PORT}/api/health" 60 || READY=$?
+
+case $READY in
+  0) echo "Ready." ;;
+  2) echo "curl not found, so the readiness wait was skipped. The page may need a refresh." ;;
+  *) echo "Still not answering after 60s. Check 'docker logs ${CONTAINER_NAME}'. Opening anyway." ;;
+esac
+
 echo "SkyFleet Ops is running at http://localhost:${PORT}"
 
 if docker volume inspect skyfleet-data >/dev/null 2>&1; then
