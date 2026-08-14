@@ -14,7 +14,11 @@ if (-not (Test-Path ".env")) {
 }
 
 $Build = $args -contains "--build"
-$ImageExists = docker image inspect $ImageName 2>$null
+
+$PSNativeCommandUseErrorActionPreference = $false
+docker image inspect $ImageName 1>$null 2>$null
+$ImageExists = ($LASTEXITCODE -eq 0)
+$PSNativeCommandUseErrorActionPreference = $true
 
 if ($Build -or -not $ImageExists) {
     Write-Host "Building $ImageName..."
@@ -39,8 +43,12 @@ docker run -d `
 
 Write-Host "SkyFleet Ops is running at http://localhost:$Port"
 
-$OldVolume = docker volume ls -q -f name=^skyfleet-data$
-if ($OldVolume) {
+$PSNativeCommandUseErrorActionPreference = $false
+docker volume inspect skyfleet-data 1>$null 2>$null
+$OldVolumeExists = ($LASTEXITCODE -eq 0)
+$PSNativeCommandUseErrorActionPreference = $true
+
+if ($OldVolumeExists) {
     Write-Host ""
     Write-Host "Note: a previous Docker-managed volume 'skyfleet-data' still exists."
     Write-Host "This container now reads and writes database\skyfleet.db on the host instead."

@@ -26,7 +26,19 @@ findings:
   warning: 2
   info: 0
   total: 4
-status: issues_found
+status: fixed
+fixed: 2026-08-14
+fix_notes: >-
+  CR-01, CR-02, WR-01, WR-02 all fixed directly by the orchestrator.
+  CR-01/CR-02: replaced regex-style volume/image filters with
+  `docker volume inspect` / `docker image inspect` + exit-code checks in both
+  start_mac.sh and start_windows.ps1; start_windows.ps1 also toggles
+  $PSNativeCommandUseErrorActionPreference around the native probes so an
+  expected first-run miss doesn't terminate the script under PowerShell 7.4+.
+  WR-01: dropped the no-op try/catch in helpers.ts (Playwright's delete()
+  doesn't throw on non-2xx) and corrected the comment. WR-02: scoped
+  fresh-start.spec.ts's readBattery() to the "Fleet Roster" panel, matching
+  the pattern missions.spec.ts already documents and uses.
 ---
 
 # Phase 04: Docker Packaging & Test Suites Code Review Report

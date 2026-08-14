@@ -12,7 +12,11 @@ const DEFAULT_DRONE_IDS = Array.from(
 );
 
 async function readBattery(page: import("@playwright/test").Page, droneId: string) {
-  const row = page.locator("tr", { has: page.getByText(droneId, { exact: true }) });
+  // Scope to the roster panel: a drone can have both a roster row and a
+  // missions-table row, and an unscoped "tr" locator would match both,
+  // tripping Playwright's strict mode (see missions.spec.ts).
+  const rosterPanel = page.getByText("Fleet Roster", { exact: true }).locator("..");
+  const row = rosterPanel.locator("tr", { has: page.getByText(droneId, { exact: true }) });
   return row.locator("td").nth(1).innerText();
 }
 

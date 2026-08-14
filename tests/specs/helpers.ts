@@ -85,28 +85,21 @@ interface RestoreOptions {
 
 /**
  * Return the fleet to its pre-spec shape: recall each launched drone, then
- * remove each added drone. Tolerates a non-2xx on each individually — the
+ * remove each added drone. A non-2xx response is expected and ignored — the
  * mission may already be recalled by the spec body, or delivered by the
- * background scheduler; the drone may already be removed. This is what
- * makes the suite re-runnable: without it, the second run starts from a
- * roster and budget the first run left behind.
+ * background scheduler; the drone may already be removed. Playwright's
+ * request.delete() never throws on HTTP error status, so no try/catch is
+ * needed here; this is what makes the suite re-runnable: without it, the
+ * second run starts from a roster and budget the first run left behind.
  */
 export async function restoreFleetState(
   request: APIRequestContext,
   { addedDroneIds = [], launchedDroneIds = [] }: RestoreOptions,
 ): Promise<void> {
   for (const droneId of launchedDroneIds) {
-    try {
-      await request.delete(`/api/fleet/missions/${droneId}`);
-    } catch {
-      // Tolerated — the mission may already be recalled or delivered.
-    }
+    await request.delete(`/api/fleet/missions/${droneId}`);
   }
   for (const droneId of addedDroneIds) {
-    try {
-      await request.delete(`/api/roster/${droneId}`);
-    } catch {
-      // Tolerated — the drone may already be removed.
-    }
+    await request.delete(`/api/roster/${droneId}`);
   }
 }

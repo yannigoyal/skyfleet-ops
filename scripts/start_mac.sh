@@ -41,7 +41,7 @@ docker run -d \
 
 echo "SkyFleet Ops is running at http://localhost:${PORT}"
 
-if docker volume ls -q -f name=^skyfleet-data$ | grep -q .; then
+if docker volume inspect skyfleet-data >/dev/null 2>&1; then
   echo ""
   echo "Note: a previous Docker-managed volume 'skyfleet-data' still exists."
   echo "This container now reads and writes database/skyfleet.db on the host instead."
